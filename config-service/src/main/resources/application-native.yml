@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: native
+  cloud:
+    config:
+      server:
+        native:
+          searchLocations: file:../config-repo
