@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield background -->
+  <path d="M32 2 L58 12 V28 C58 44 46 58 32 62 C18 58 6 44 6 28 V12 Z" fill="#2563eb" stroke="#1e40af" stroke-width="2"/>
+  
+  <!-- Dashboard grid (4 squares) -->
+  <rect x="20" y="20" width="8" height="8" rx="1" fill="#ffffff"/>
+  <rect x="36" y="20" width="8" height="8" rx="1" fill="#ffffff"/>
+  <rect x="20" y="36" width="8" height="8" rx="1" fill="#ffffff"/>
+  <rect x="36" y="36" width="8" height="8" rx="1" fill="#ffffff"/>
+</svg>

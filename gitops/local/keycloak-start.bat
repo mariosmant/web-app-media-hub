@@ -25,7 +25,14 @@ REM --- Put the provided JDK on PATH (in front) ---
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
 REM --- Start Keycloak ---
-call "%KEYCLOAK_HOME%\bin\kc.bat" start-dev
+REM set KC_PROXY=reencrypt
+set KC_HTTP_RELATIVE_PATH=/iam-service
+set KC_HOSTNAME=localhost
+set KC_FRONTEND_URL=https://localhost/iam-service/
+REM set "KC_HTTPS_CERTIFICATE_FILE=%KEYCLOAK_HOME%\\conf\\keycloak-cert.pem"
+REM set "KC_HTTPS_CERTIFICATE_KEY_FILE=%KEYCLOAK_HOME%\\conf\\keycloak-key.pem"
+set KC_PROXY_HEADERS=forwarded
+call "%KEYCLOAK_HOME%\bin\kc.bat" start
 
 exit /b %errorlevel%
 

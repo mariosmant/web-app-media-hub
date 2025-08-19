@@ -1,0 +1,5 @@
+/* Optional global tweaks */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
