@@ -25,7 +25,11 @@
 		<com.fasterxml.jackson.core.version>2.19.1</com.fasterxml.jackson.core.version>
 		<org.mockito.version>5.11.0</org.mockito.version>
 
-		<!-- Plugins -->
+        <bucket4j.version>8.14.0</bucket4j.version>
+        <keycloak.admin.version>24.0.5</keycloak.admin.version>
+
+
+        <!-- Plugins -->
 		<org.apache.maven.plugins.maven.compiler.plugin.version>3.14.0</org.apache.maven.plugins.maven.compiler.plugin.version>
 		<org.apache.maven.plugins.maven.surefire.plugin.version>3.2.5</org.apache.maven.plugins.maven.surefire.plugin.version>
 		<org.codehaus.mojo.version>1.7.1</org.codehaus.mojo.version>
@@ -97,7 +101,16 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
-			</plugin>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+
+            </plugin>
 
 			<!-- Maven Surefire Plugin -->
 			<plugin>

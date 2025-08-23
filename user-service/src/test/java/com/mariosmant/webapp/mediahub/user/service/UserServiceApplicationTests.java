@@ -1,10 +1,10 @@
-package com.mariosmant.webapp.mediahub.core;
+package com.mariosmant.webapp.mediahub.user.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CrudCoreApplicationTests {
+class UserServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
