@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.user.service.conf;
+package com.mariosmant.webapp.mediahub.common.cache.conf;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

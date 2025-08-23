@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.user.service.conf;
+package com.mariosmant.webapp.mediahub.common.security.conf;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

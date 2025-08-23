@@ -7,15 +7,15 @@
 		<artifactId>parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>common-security</artifactId>
-	<name>media-hub-common-security</name>
-	<description>Media Hub Common Security</description>
+	<artifactId>common-rate-limiter</artifactId>
+	<name>media-hub-common-rate-limiter</name>
+	<description>Media Hub Common Rate Limiter.</description>
 	<properties>
 	</properties>
 	<dependencies>
 		<dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <artifactId>spring-boot-starter</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -24,16 +24,17 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency>
-
 		<!-- Log4j2 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional> <!-- Don't downstream it. In the future, rate limiter may be offered also without Redis. -->
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>

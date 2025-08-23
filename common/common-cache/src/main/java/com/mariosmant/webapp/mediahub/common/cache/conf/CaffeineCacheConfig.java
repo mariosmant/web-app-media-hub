@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.user.service.conf;
+package com.mariosmant.webapp.mediahub.common.cache.conf;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.caffeine.CaffeineCacheManager;

@@ -13,14 +13,16 @@
 		<!-- Version -->
 		<revision>0.0.1-SNAPSHOT</revision>
 
+
 		<!-- Project -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>21</java.version>
 
 		<!-- Dependencies -->
-		<spring-boot.version>3.5.3</spring-boot.version>
+		<spring-boot.version>3.5.5</spring-boot.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
-		<org.projectlombok.version>1.18.38</org.projectlombok.version>
+        <common-version>0.0.1-SNAPSHOT</common-version>
+        <org.projectlombok.version>1.18.38</org.projectlombok.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<com.fasterxml.jackson.core.version>2.19.1</com.fasterxml.jackson.core.version>
 		<org.mockito.version>5.11.0</org.mockito.version>
@@ -46,11 +48,34 @@
 				<scope>import</scope>
 			</dependency>
 
-			<dependency>
-				<groupId>com.mariosmant.webapp.mediahub</groupId>
-				<artifactId>common</artifactId>
-				<version>${revision}</version>
-			</dependency>
+            <!-- TODO Check common version here maybe move to another module -->
+            <!-- Common Cache -->
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-cache</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <!-- Common Rate Limiter API -->
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-rate-limiter</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <!-- Common Rate Limiter Bucket Implementation -->
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-rate-limiter-token-bucket</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <!-- Common Security -->
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-security</artifactId>
+                <version>${common-version}</version>
+            </dependency>
 
 			<!-- Spring Cloud -->
 			<dependency>

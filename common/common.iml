@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$" dumb="true">
+      <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common-security/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common-security/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/common-security/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/common-security/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/main/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/test/resources" type="java-test-resource" />
+    </content>
+  </component>
+</module>
