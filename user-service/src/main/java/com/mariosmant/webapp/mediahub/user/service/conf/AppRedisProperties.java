@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Getter
-@Setter
+//@Setter
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "app.redis")
 public class AppRedisProperties {
