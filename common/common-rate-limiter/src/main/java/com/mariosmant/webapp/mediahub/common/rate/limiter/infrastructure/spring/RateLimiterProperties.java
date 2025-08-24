@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.common.rate.limiter.conf;
+package com.mariosmant.webapp.mediahub.common.rate.limiter.infrastructure.spring;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

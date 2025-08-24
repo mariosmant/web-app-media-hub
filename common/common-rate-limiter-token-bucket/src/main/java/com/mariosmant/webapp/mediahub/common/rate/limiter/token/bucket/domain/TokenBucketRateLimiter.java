@@ -1,9 +1,9 @@
-package com.mariosmant.webapp.mediahub.common.rate.limiter.token.bucket;
+package com.mariosmant.webapp.mediahub.common.rate.limiter.token.bucket.domain;
 
-import com.mariosmant.webapp.mediahub.common.rate.limiter.RateLimitDecision;
-import com.mariosmant.webapp.mediahub.common.rate.limiter.RateLimiter;
-import com.mariosmant.webapp.mediahub.common.rate.limiter.RedisScriptLoader;
-import com.mariosmant.webapp.mediahub.common.rate.limiter.conf.RateLimiterProperties;
+import com.mariosmant.webapp.mediahub.common.rate.limiter.domain.RateLimitDecision;
+import com.mariosmant.webapp.mediahub.common.rate.limiter.domain.RateLimiter;
+import com.mariosmant.webapp.mediahub.common.rate.limiter.infrastructure.spring.redis.RedisScriptLoader;
+import com.mariosmant.webapp.mediahub.common.rate.limiter.infrastructure.spring.RateLimiterProperties;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
@@ -18,7 +18,7 @@ public class TokenBucketRateLimiter implements RateLimiter {
     public TokenBucketRateLimiter(StringRedisTemplate redis, RateLimiterProperties props) {
         this.redis = redis;
         this.props = props;
-        this.script = RedisScriptLoader.load("scripts/token_bucket.lua", List.class);
+        this.script = RedisScriptLoader.load("redis-scripts/token_bucket.lua", List.class);
     }
 
     @Override

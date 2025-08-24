@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.common.rate.limiter;
+package com.mariosmant.webapp.mediahub.common.rate.limiter.infrastructure.spring.redis;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
