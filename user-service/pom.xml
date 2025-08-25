@@ -51,15 +51,40 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.postgresql</groupId>-->
-<!--            <artifactId>postgresql</artifactId>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-cache</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-rate-limiter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-rate-limiter-token-bucket</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-utils</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- Redis + Caffeine -->
         <dependency>
@@ -122,4 +147,15 @@
 		</dependency>
 	</dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common</artifactId>
+                <version>${common-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

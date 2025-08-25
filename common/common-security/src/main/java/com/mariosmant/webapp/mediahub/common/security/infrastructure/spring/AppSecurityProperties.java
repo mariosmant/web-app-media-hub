@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.common.security.conf;
+package com.mariosmant.webapp.mediahub.common.security.infrastructure.spring;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

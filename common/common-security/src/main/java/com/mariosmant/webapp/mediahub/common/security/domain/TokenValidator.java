@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.common.security.conf;
+package com.mariosmant.webapp.mediahub.common.security.domain;
 
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;

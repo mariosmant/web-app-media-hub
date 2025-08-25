@@ -11,6 +11,7 @@
       <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/common-rate-limiter-token-bucket/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/common-utils/src/main/java" isTestSource="false" />
     </content>
   </component>
 </module>
