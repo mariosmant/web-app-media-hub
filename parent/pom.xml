@@ -28,7 +28,7 @@
 		<org.mockito.version>5.11.0</org.mockito.version>
 
         <bucket4j.version>8.14.0</bucket4j.version>
-        <keycloak.admin.version>24.0.5</keycloak.admin.version>
+        <keycloak.admin.version>26.0.6</keycloak.admin.version>
 
 
         <!-- Plugins -->
