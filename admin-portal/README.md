@@ -1,7 +1,7 @@
 # Admin Portal
 
 ## Prerequisites
-- NodeJS 22.18.0
+- NodeJS 22.19.0
 - NPM 10.9.3
 
 ## Technologies used

@@ -21,6 +21,12 @@ if not exist "%KEYCLOAK_HOME%\bin\kc.bat" (
   exit /b 1
 )
 
+REM --- Set KC_BOOTSTRAP_ADMIN_USERNAME from parameter 3 ---
+set "KC_BOOTSTRAP_ADMIN_USERNAME=%~3"
+REM --- Set KC_ADMIN_PASSWORD from parameter 4 ---
+set "KC_BOOTSTRAP_ADMIN_PASSWORD=%~4"
+
+
 REM --- Put the provided JDK on PATH (in front) ---
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 

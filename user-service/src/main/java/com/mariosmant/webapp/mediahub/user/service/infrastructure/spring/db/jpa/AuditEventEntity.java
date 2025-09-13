@@ -18,7 +18,7 @@ public class AuditEventEntity {
     private String actor;
 
     @Column(length = 64, nullable = false)
-    private String action;
+    private String eventAction;
 
     @Column(length = 64)
     private String subjectId;
@@ -32,8 +32,8 @@ public class AuditEventEntity {
     public void setOccurredAt(Instant occurredAt) { this.occurredAt = occurredAt; }
     public String getActor() { return actor; }
     public void setActor(String actor) { this.actor = actor; }
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
+    public String getEventAction() { return eventAction; }
+    public void setEventAction(String eventAction) { this.eventAction = eventAction; }
     public String getSubjectId() { return subjectId; }
     public void setSubjectId(String subjectId) { this.subjectId = subjectId; }
     public String getDetailsJson() { return detailsJson; }

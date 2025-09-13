@@ -1,0 +1,88 @@
+spring:
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: MediaHubHikari
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000       # 30s
+      idle-timeout: 600000            # 10m
+      max-lifetime: 1800000           # 30m (keep < PG default 8h)
+      #leak-detection-threshold: 20000 # 20s (optional; enable if diagnosing leaks)
+      data-source-properties:
+        reWriteBatchedInserts: true   # PostgreSQL batch insert optimization
+        stringtype: unspecified       # Safer for Long/UUID/text casts
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
+    contexts: local
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 100
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        format_sql: true
+
+#  cache:
+#    type: caffeine
+#    cache-names: auditEvents
+#    caffeine:
+#      spec: maximumSize=10000,expireAfterWrite=10m
+
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1KB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      region: eu
+  observations:
+    key-values:
+      application: ${spring.application.name}
+      region: eu
+
+logging:
+  config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
+  level:
+    root: DEBUG
+    org.springframework.web: DEBUG                 # Detailed request mapping logs
+    org.springframework.security: DEBUG            # See auth flow
+    org.springframework.boot.autoconfigure: DEBUG # See which auto-configs are applied
+    org.hibernate.SQL: DEBUG                       # Show SQL statements
+    org.hibernate.orm.jdbc.bind: TRACE             # Show SQL params (Hibernate 6+)
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: WARN
+    com.zaxxer.hikari: DEBUG                        # Connection pool activity
+    org.apache.catalina: INFO                       # Embedded Tomcat startup info
+    liquibase: DEBUG                                # Detailed migration logs
+    liquibase.changelog: DEBUG                      # Show each changeset applied
+    liquibase.executor: DEBUG                       # Show SQL executed by Liquibase
+    org.springframework.cache: DEBUG                # Cache hits/misses

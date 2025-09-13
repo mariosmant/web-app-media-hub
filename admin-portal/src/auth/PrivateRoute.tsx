@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import type { JSX } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { useLocation } from 'react-router-dom';
+import type { CustomAuthState } from './AuthUtils';
 
 export const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const auth = useAuth();
@@ -11,7 +12,8 @@ export const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     if (!auth.isLoading && !auth.isAuthenticated && !auth.activeNavigator) {
       const returnTo = location.pathname + location.search;
       sessionStorage.setItem('returnTo', returnTo);
-      void auth.signinRedirect({ state: { returnTo } });
+      let customState: CustomAuthState = { returnTo };
+      void auth.signinRedirect({ state: customState });
     }
   }, [auth, location]);
 

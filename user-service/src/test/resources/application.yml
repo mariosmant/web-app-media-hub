@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: mediahub
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      pool-name: MediaHubHikariTest
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      data-source-properties:
+        reWriteBatchedInserts: true
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
+    contexts: test
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        jdbc:
+          batch_size: 50
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        format_sql: true
+
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+logging:
+  config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
+  level:
+    root: DEBUG
+    org.springframework.web: DEBUG                 # Detailed request mapping logs
+    org.springframework.security: DEBUG            # See auth flow
+    org.springframework.boot.autoconfigure: DEBUG # See which auto-configs are applied
+    org.hibernate.SQL: DEBUG                       # Show SQL statements
+    org.hibernate.orm.jdbc.bind: TRACE             # Show SQL params (Hibernate 6+)
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: WARN
+    com.zaxxer.hikari: DEBUG                        # Connection pool activity
+    org.apache.catalina: INFO                       # Embedded Tomcat startup info
+    liquibase: DEBUG                                # Detailed migration logs
+    liquibase.changelog: DEBUG                      # Show each changeset applied
+    liquibase.executor: DEBUG                       # Show SQL executed by Liquibase
+    org.springframework.cache: DEBUG                # Cache hits/misses
+
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      region: local
+  observations:
+    key-values:
+      application: ${spring.application.name}
+      region: local

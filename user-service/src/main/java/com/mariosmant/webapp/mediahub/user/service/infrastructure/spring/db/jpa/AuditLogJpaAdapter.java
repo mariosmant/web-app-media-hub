@@ -26,7 +26,7 @@ public class AuditLogJpaAdapter implements AuditLogPort {
         AuditEventEntity e = new AuditEventEntity();
         e.setOccurredAt(at != null ? at : Instant.now());
         e.setActor(actor);
-        e.setAction(action);
+        e.setEventAction(action);
         e.setSubjectId(subjectId);
         try {
             e.setDetailsJson(details != null ? mapper.writeValueAsString(details) : "{}");

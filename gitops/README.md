@@ -128,3 +128,45 @@ kubectl create namespace cattle-system
 
 helm install rancher rancher-latest/rancher --namespace cattle-system --set hostname=rancher.local --set replicas=1
 ```
+
+## Keycloak (local)
+
+```sql
+-- Connect to PostgreSQL as the postgres superuser
+psql -U postgres
+
+-- 1. Create the database
+CREATE DATABASE keycloak_db;
+
+-- 2. Create the user with a strong password
+CREATE USER keycloak_user WITH PASSWORD 'StrongP@ssw0rd';
+
+-- 3. Grant all privileges on the database to the user
+GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO keycloak_user;
+
+-- 4. (Optional) Ensure the user can manage schema objects
+\c keycloak_db
+GRANT ALL PRIVILEGES ON SCHEMA public TO keycloak_user;
+```
+
+
+## Admin DB (local)
+```sql
+-- Connect to PostgreSQL as the postgres superuser
+psql -U postgres
+
+-- 1. Create the database
+CREATE DATABASE admin_db;
+
+-- 2. Create the user with a strong password
+CREATE USER mediahub_admin WITH PASSWORD 'StrongP@ssw0rd';
+
+-- 3. Grant all privileges on the database to the user
+GRANT ALL PRIVILEGES ON DATABASE admin_db TO mediahub_admin;
+
+-- 4. Switch to the new database
+\c admin_db
+
+-- 5. Grant privileges on the public schema
+GRANT ALL PRIVILEGES ON SCHEMA public TO mediahub_admin;
+```

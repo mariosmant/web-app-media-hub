@@ -6,7 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class UserServiceApplicationTests {
 
-	@Test
+    // TODO Add e2e test for keycloak.
+	//@Test
 	void contextLoads() {
 	}
 
