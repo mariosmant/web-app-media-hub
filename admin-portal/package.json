@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "cross-env APP_ENV=dev vite --mode dev",
     "dev:local": "cross-env APP_ENV=local vite --mode dev",
+    "preview:local": "cross-env APP_ENV=local vite preview --mode dev",
     "build:local": "cross-env APP_ENV=local tsc -b && cross-env APP_ENV=local vite build --mode dev",
     "build:dev": "cross-env APP_ENV=dev tsc -b && cross-env APP_ENV=local vite build --mode dev",
     "build:prod": "cross-env APP_ENV=prod tsc -b && cross-env APP_ENV=local vite build --mode prod",

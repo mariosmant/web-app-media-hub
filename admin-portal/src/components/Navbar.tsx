@@ -2,6 +2,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import { useI18n } from '../i18n/i18n';
 import type { CustomAuthState } from '../auth/AuthUtils';
+import { NORMALIZED_APP_BASE_URL } from '../constants/paths';
 
 // Preload likely routes on intent
 const preloadHome = () => import('../routes/home');
@@ -17,7 +18,7 @@ export function Navbar() {
     `nav-link${isActive ? ' active' : ''}`;
 
   const onLogin = () => {
-    let customState: CustomAuthState = { returnTo: location.pathname + location.search };
+    let customState: CustomAuthState = { returnTo: NORMALIZED_APP_BASE_URL + location.pathname + location.search };
     void auth.signinRedirect({
       state: customState,
     });

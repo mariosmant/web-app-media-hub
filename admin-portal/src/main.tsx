@@ -2,7 +2,6 @@ import { StrictMode, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import router from './router';
-import { OIDCAuthProvider } from './auth/AuthProvider';
 import { I18nProvider } from './i18n/i18n';
 
 // Bootstrap CSS/JS and Icons
@@ -12,15 +11,14 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 
 import './index.css';
 import './styles/App.css';
+import { AppFallback } from './components/AppFallback';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <I18nProvider>
-      <OIDCAuthProvider>
-        <Suspense fallback={<div className="app-fallback" role="status" aria-live="polite">Loading…</div>}>
-          <RouterProvider router={router} />
-        </Suspense>
-      </OIDCAuthProvider>
+      <Suspense fallback={<AppFallback />}>
+        <RouterProvider router={router} />
+      </Suspense>
     </I18nProvider>
   </StrictMode>
 );

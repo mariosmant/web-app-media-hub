@@ -23,9 +23,10 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     plugins: [react()],
+    base: process.env.VITE_BASE_PATH || '/',
       ...(command === 'serve' && mode == 'dev' && { 
         server: {
-          port: 5173,
+          port: 5174,
           strictPort: true
         }
       }),
