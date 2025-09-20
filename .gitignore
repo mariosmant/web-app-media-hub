@@ -20,3 +20,5 @@ gitops/local/nginx/certs
 /.idea
 
 .idea
+
+.flattened-pom.xml

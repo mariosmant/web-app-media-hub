@@ -180,7 +180,14 @@
 					<flattenMode>resolveCiFriendliesOnly</flattenMode>
 				</configuration>
 				<executions>
-					<execution>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
 						<id>flatten</id>
 						<phase>process-resources</phase>
 						<goals>
