@@ -13,10 +13,6 @@
 	<properties>
 	</properties>
 	<dependencies>
-<!--		<dependency>-->
-<!--			<groupId>com.mariosmant.webapp.mediahub</groupId>-->
-<!--			<artifactId>common</artifactId>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -28,97 +24,136 @@
 			</exclusions>
 		</dependency>
 
+        <!-- Config client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <!-- For TLS and OAuth2 client pieces used by the config client -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--        </dependency>-->
 
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>-->
+<!--        </dependency>-->
+
+        <!-- For validations -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- For HATEOAS -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-hateoas</artifactId>
         </dependency>
+
+        <!-- JSON -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-json</artifactId>
         </dependency>
 
+        <!-- Cache -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
             <artifactId>common-cache</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-cache-caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-cache-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-cache-two-level</artifactId>
+        </dependency>
 
+        <!-- Rate Limiter -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
             <artifactId>common-rate-limiter</artifactId>
         </dependency>
-
+        <!-- Token Bucket Rate Limiter -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
             <artifactId>common-rate-limiter-token-bucket</artifactId>
         </dependency>
 
+        <!-- Security -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
             <artifactId>common-security</artifactId>
         </dependency>
 
+        <!-- Utils -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
             <artifactId>common-utils</artifactId>
         </dependency>
 
+        <!-- JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+        <!-- For testing H2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 
-
-        <!-- Redis + Caffeine -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-        </dependency>
 
-        <!-- Bucket4j (rate limiting) -->
-        <!-- Core -->
-        <dependency>
-            <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j_jdk17-core</artifactId>
-            <version>${bucket4j.version}</version>
-        </dependency>
+<!--        &lt;!&ndash; Redis + Caffeine &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
+<!--        </dependency>-->
 
-        <!-- Redis integration -->
-        <dependency>
-            <groupId>com.bucket4j</groupId>
-            <artifactId>bucket4j_jdk17-redis</artifactId>
-            <version>${bucket4j.version}</version>
-            <type>pom</type>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.ben-manes.caffeine</groupId>-->
+<!--            <artifactId>caffeine</artifactId>-->
+<!--        </dependency>-->
+
+<!--        &lt;!&ndash; Bucket4j (rate limiting) &ndash;&gt;-->
+<!--        &lt;!&ndash; Core &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.bucket4j</groupId>-->
+<!--            <artifactId>bucket4j_jdk17-core</artifactId>-->
+<!--            <version>${bucket4j.version}</version>-->
+<!--        </dependency>-->
+
+<!--        &lt;!&ndash; Redis integration &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.bucket4j</groupId>-->
+<!--            <artifactId>bucket4j_jdk17-redis</artifactId>-->
+<!--            <version>${bucket4j.version}</version>-->
+<!--            <type>pom</type>-->
+<!--        </dependency>-->
 
 
 
@@ -129,11 +164,11 @@
             <version>${keycloak.admin.version}</version>
         </dependency>
 
-        <!-- JSON -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
+<!--        &lt;!&ndash; JSON &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.datatype</groupId>-->
+<!--            <artifactId>jackson-datatype-jsr310</artifactId>-->
+<!--        </dependency>-->
 
 
         <dependency>

@@ -1,6 +1,23 @@
-server:
-  port: 8888
 
 spring:
   application:
     name: config-service
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: config-server
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.config: INFO
+

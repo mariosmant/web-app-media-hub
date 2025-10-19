@@ -6,4 +6,88 @@ spring:
     config:
       server:
         native:
-          searchLocations: file:../config-repo
+          search-locations: file:${CONFIG_REPO_DIR:../config/services}
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://auth.example.com/realms/myrealm}
+#          jwk-set-uri: ${KEYCLOAK_JWKS_URI:https://auth.example.com/realms/myrealm/protocol/openid-connect/certs}
+#        opaque-token:
+#          introspection-uri: ${KEYCLOAK_INTROSPECTION_URI:https://auth.example.com/realms/myrealm/protocol/openid-connect/token/introspect}
+#          client-id: ${KEYCLOAK_CLIENT_ID:config-service}
+#          client-secret: ${KEYCLOAK_CLIENT_SECRET}
+server:
+  port: 8888
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1KB
+  # mTLS placeholders for later (Istio/Kong re-encrypt)
+  #  ssl:
+  #    enabled: true
+  #    key-store: classpath:tls/config-server-keystore.p12
+  #    key-store-password: ${CONFIG_SERVER_KEYSTORE_PASSWORD}
+  #    key-store-type: PKCS12
+  #    trust-store: classpath:tls/config-server-truststore.p12
+  #    trust-store-password: ${CONFIG_SERVER_TRUSTSTORE_PASSWORD}
+  #    client-auth: need
+
+app:
+  security:
+    # Issuer URI for the "private" realm
+    issuer-uri: https://localhost:8443/realms/private
+
+    # JWK Set URI for JWT validation
+    jwk-set-uri: https://localhost:8443/realms/private/protocol/openid-connect/certs
+
+    # Expected audiences (list of resource identifiers your API accepts)
+    audiences:
+      - config-server
+
+    # Introspection endpoint for opaque tokens
+    introspection-uri: ${INTROSPECTION_URI}
+
+    # Client certificate keystore (for mTLS)
+    introspection-keystore-path: ${INTROSPECTION_KEYSTORE_PATH}
+    introspection-keystore-password: ${INTROSPECTION_KEYSTORE_PASSWORD}
+
+    # Truststore containing Keycloak server cert or CA
+    introspection-truststore-path: ${INTROSPECTION_TRUSTSTORE_PATH}
+    introspection-truststore-password: ${INTROSPECTION_TRUSTSTORE_PASSWORD}
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+  observations:
+    key-values:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+
+logging:
+  config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
+  level:
+    root: DEBUG
+    org.springframework.web: DEBUG                 # Detailed request mapping logs
+    org.springframework.security: DEBUG            # See auth flow
+    org.springframework.boot.autoconfigure: DEBUG # See which auto-configs are applied
+    org.apache.catalina: INFO                       # Embedded Tomcat startup info

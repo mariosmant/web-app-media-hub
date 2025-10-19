@@ -16,11 +16,17 @@
 	</properties>
 
     <modules>
-        <module>common-utils</module>
         <module>common-cache</module>
+        <module>common-cache-caffeine</module>
+        <module>common-cache-redis</module>
+        <module>common-cache-two-level</module>
+        <module>common-json</module>
+<!--        <module>common-model</module>-->
         <module>common-rate-limiter</module>
         <module>common-rate-limiter-token-bucket</module>
         <module>common-security</module>
+        <module>common-utils</module>
+        <module>common-web</module>
     </modules>
 
     <dependencyManagement>
@@ -28,6 +34,30 @@
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-cache</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-cache-caffeine</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-cache-redis</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-cache-two-level</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-json</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
@@ -52,6 +82,12 @@
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-utils</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-web</artifactId>
                 <version>${common-version}</version>
             </dependency>
         </dependencies>

@@ -16,19 +16,23 @@
 
 		<!-- Project -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>21</java.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<java.version>25</java.version>
 
 		<!-- Dependencies -->
-		<spring-boot.version>3.5.5</spring-boot.version>
+		<spring-boot.version>3.5.6</spring-boot.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
         <common-version>0.0.1-SNAPSHOT</common-version>
-        <org.projectlombok.version>1.18.38</org.projectlombok.version>
+        <org.projectlombok.version>1.18.42</org.projectlombok.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
-		<com.fasterxml.jackson.core.version>2.19.1</com.fasterxml.jackson.core.version>
-		<org.mockito.version>5.11.0</org.mockito.version>
+		<com.fasterxml.jackson.core.version>2.20.0</com.fasterxml.jackson.core.version>
+        <apache.commons.lang3>3.19.0</apache.commons.lang3>
+        <apache.commons.pool2>2.12.1</apache.commons.pool2>
+<!--		<org.mockito.version>5.11.0</org.mockito.version>-->
 
         <bucket4j.version>8.14.0</bucket4j.version>
-        <keycloak.admin.version>26.0.6</keycloak.admin.version>
+        <keycloak.admin.version>26.0.7</keycloak.admin.version>
 
 
         <!-- Plugins -->
@@ -47,6 +51,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 
             <!-- TODO Check common version here maybe move to another module -->
             <!-- Common Cache -->
@@ -86,19 +91,21 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- Jackson Core -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>${com.fasterxml.jackson.core.version}</version>
-			</dependency>
 
-			<!-- Jackson Databind -->
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${com.fasterxml.jackson.core.version}</version>
-			</dependency>
+            <!-- Apache Commons Lang -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${apache.commons.lang3}</version>
+            </dependency>
+
+            <!-- Commons Pool2 for connection pooling support -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${apache.commons.pool2}</version>
+            </dependency>
+
 
 
 			<!-- Lombok -->
@@ -181,7 +188,7 @@
 				</configuration>
 				<executions>
                     <execution>
-                        <id>flatten</id>
+                        <id>flatten.validate</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>flatten</goal>
