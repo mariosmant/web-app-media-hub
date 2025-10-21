@@ -2,11 +2,11 @@ package com.mariosmant.webapp.mediahub.common.cache.redis.infrastructure.spring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass(RedisCacheManager.class)
 @ConditionalOnProperty(prefix = "app.cache.redis", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({AppCacheRedisProperties.class})

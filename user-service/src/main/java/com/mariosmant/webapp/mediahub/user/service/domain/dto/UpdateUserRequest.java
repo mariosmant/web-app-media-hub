@@ -1,6 +1,6 @@
 package com.mariosmant.webapp.mediahub.user.service.domain.dto;
 
-import com.mariosmant.webapp.mediahub.common.utils.annotations.NoHtml;
+import com.mariosmant.webapp.mediahub.common.utils.web.annotations.NoHtml;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 

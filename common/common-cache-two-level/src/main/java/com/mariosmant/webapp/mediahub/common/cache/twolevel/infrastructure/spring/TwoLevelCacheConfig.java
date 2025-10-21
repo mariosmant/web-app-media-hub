@@ -1,16 +1,16 @@
 package com.mariosmant.webapp.mediahub.common.cache.twolevel.infrastructure.spring;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnProperty(prefix = "app.cache.two-level", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({AppCacheTwoLevelProperties.class})
 public class TwoLevelCacheConfig {

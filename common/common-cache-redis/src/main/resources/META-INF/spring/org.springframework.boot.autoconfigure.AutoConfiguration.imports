@@ -1,0 +1,2 @@
+com.mariosmant.webapp.mediahub.common.cache.redis.infrastructure.spring.RedisCacheConfig
+com.mariosmant.webapp.mediahub.common.cache.redis.infrastructure.spring.RedisLettuceNativeConfig

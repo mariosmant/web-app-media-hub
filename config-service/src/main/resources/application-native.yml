@@ -41,10 +41,10 @@ server:
 app:
   security:
     # Issuer URI for the "private" realm
-    issuer-uri: https://localhost:8443/realms/private
+    issuer-uri: https://localhost:8443/iam-service/realms/private
 
     # JWK Set URI for JWT validation
-    jwk-set-uri: https://localhost:8443/realms/private/protocol/openid-connect/certs
+    #jwk-set-uri: https://localhost:8443/iam-service/realms/private/protocol/openid-connect/certs
 
     # Expected audiences (list of resource identifiers your API accepts)
     audiences:

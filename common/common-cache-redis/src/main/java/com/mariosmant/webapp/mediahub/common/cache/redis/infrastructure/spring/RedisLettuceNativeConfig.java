@@ -4,16 +4,16 @@ import io.lettuce.core.ClientOptions;
 import io.lettuce.core.TimeoutOptions;
 import io.lettuce.core.api.StatefulConnection;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.*;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties({AppCacheRedisProperties.class})
 public class RedisLettuceNativeConfig {
     private static final String PORT_DELIMITER = ":";

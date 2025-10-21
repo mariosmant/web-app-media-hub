@@ -1,6 +1,7 @@
 package com.mariosmant.webapp.mediahub.common.cache.caffeine.infrastructure.spring;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,11 +11,10 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
+@AutoConfiguration
 @ConditionalOnClass(CaffeineCacheManager.class)
 @ConditionalOnProperty(prefix = "app.cache.caffeine", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties({AppCacheCaffeineProperties.class})

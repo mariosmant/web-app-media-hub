@@ -20,12 +20,11 @@ spring:
       request-connect-timeout: 3000
       request-read-timeout: 3000
       # OAuth2 client credentials for Keycloak
-      client:
-        oauth2:
-          client-id: ${CONFIG_CLIENT_ID}
-          client-secret: ${CONFIG_CLIENT_SECRET}
-          access-token-uri: ${KEYCLOAK_TOKEN_URI}
-          grant-type: client_credentials
+      oauth2:
+        client-id: ${CONFIG_CLIENT_ID}
+        client-secret: ${CONFIG_CLIENT_SECRET}
+        access-token-uri: ${KEYCLOAK_TOKEN_URI}
+        grant-type: client_credentials
 
 logging:
   level:

@@ -16,7 +16,7 @@
 	</properties>
 
     <modules>
-        <module>common-cache</module>
+        <module>common-cache-core</module>
         <module>common-cache-caffeine</module>
         <module>common-cache-redis</module>
         <module>common-cache-two-level</module>

@@ -66,7 +66,7 @@
         <!-- Cache -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-cache</artifactId>
+            <artifactId>common-cache-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
@@ -162,6 +162,12 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
             <version>${keycloak.admin.version}</version>
+        </dependency>
+
+        <!-- Apache Commons Lang -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
 
 <!--        &lt;!&ndash; JSON &ndash;&gt;-->
