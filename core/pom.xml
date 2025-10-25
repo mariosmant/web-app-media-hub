@@ -8,7 +8,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>core</artifactId>
-	<name>crud-core</name>
+	<name>media-hub-crud-core</name>
 	<description>Demo CRUD Spring Boot project (core)</description>
 	<properties>
 	</properties>

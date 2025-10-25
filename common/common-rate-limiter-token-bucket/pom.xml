@@ -12,6 +12,17 @@
 	<description>Media Hub Common Rate Limiter Bucket Algorithm</description>
 	<properties>
 	</properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common</artifactId>
+                <version>${common-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 	<dependencies>
 		<dependency>
             <groupId>org.springframework.boot</groupId>

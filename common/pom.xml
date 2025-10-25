@@ -24,7 +24,10 @@
 <!--        <module>common-model</module>-->
         <module>common-rate-limiter</module>
         <module>common-rate-limiter-token-bucket</module>
-        <module>common-security</module>
+        <module>common-security-context</module>
+        <module>common-security-core</module>
+        <module>common-security-cache</module>
+        <module>common-security-db</module>
         <module>common-utils</module>
         <module>common-web</module>
     </modules>
@@ -75,9 +78,25 @@
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-security</artifactId>
+                <artifactId>common-security-context</artifactId>
                 <version>${common-version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-security-core</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-security-cache</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-security-db</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>

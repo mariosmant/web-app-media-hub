@@ -54,6 +54,37 @@ server:
     mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
     min-response-size: 1KB
 
+security:
+  jwt:
+    issuer: https://auth.example.gov/realms/ultra
+    jwkSetUri: https://auth.example.gov/realms/ultra/protocol/openid-connect/certs
+    validator-policy:
+      issuer: true
+      algorithm: true
+      typ-header: true
+      audience: true
+      authorized-party: true
+      scope: true
+      subject-format: true
+      exp-nbf-skew: true
+      kid: true
+      tenant: true
+      jti: false
+      jti-store-method: cache
+    algorithm-policy:
+      allowed-algs: [PS256]              # Pin RSA-PSS (PS256)
+    header-policy:
+      allowed-typ-headers: [JWT]
+      enforce-kid-pinning: true
+      allowed-kids: [kid-2025-10-rotate-01, kid-2025-10-rotate-02]
+    claim-policy:
+      required-audiences: [ultra-api]
+      allowed-azp: [ultra-frontend, ultra-partner]
+      required-scopes: [read:secure, write:secure]
+      subject-pattern: '^[a-f0-9-]{36}$'
+      clock-skew: 60s
+
+
 app:
   cache:
     caffeine:

@@ -10,7 +10,7 @@
     <artifactId>config-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>config-service</name>
+    <name>media-hub-config-service</name>
     <description>Config Service used as Spring Cloud Config server for properties and configuration files.</description>
     <properties>
     </properties>

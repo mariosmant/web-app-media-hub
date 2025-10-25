@@ -6,7 +6,7 @@ spring:
     config:
       server:
         git:
-          # SSH URL to your private config repository
+          # SSH URL to your private config repositories
           uri: ${CONFIG_GIT_URI}
           # Use a fixed local working directory for clones/caches
           basedir: ${CONFIG_GIT_BASEDIR:/var/lib/config-server/git}
