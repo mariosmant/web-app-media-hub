@@ -1,1 +1,1 @@
-com.mariosmant.webapp.mediahub.common.json.infrastructure.JsonConfig
+com.mariosmant.webapp.mediahub.common.json.infrastructure.spring.config.JsonConfig

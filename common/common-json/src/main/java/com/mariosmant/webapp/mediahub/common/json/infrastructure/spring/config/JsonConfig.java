@@ -1,4 +1,4 @@
-package com.mariosmant.webapp.mediahub.common.json.infrastructure;
+package com.mariosmant.webapp.mediahub.common.json.infrastructure.spring.config;
 
 
 import com.fasterxml.jackson.databind.DeserializationFeature;

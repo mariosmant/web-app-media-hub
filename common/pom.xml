@@ -20,6 +20,11 @@
         <module>common-cache-caffeine</module>
         <module>common-cache-redis</module>
         <module>common-cache-two-level</module>
+        <module>common-file-core</module>
+        <module>common-file-spring</module>
+        <module>common-file-azure-blob</module>
+        <module>common-file-azure-file-share</module>
+        <module>common-file-azure-storage</module>
         <module>common-json</module>
 <!--        <module>common-model</module>-->
         <module>common-rate-limiter</module>
@@ -55,6 +60,32 @@
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-cache-two-level</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-file-core</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-file-spring</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-file-azure-blob</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-file-azure-file-share</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-file-azure-storage</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
