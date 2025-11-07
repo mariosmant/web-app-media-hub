@@ -16,6 +16,10 @@ public class FileService implements FilePort {
     private static final int DEFAULT_IO_BUFFER = 32 * 1024;   // 32 KB copy buffer
     private static final int DEFAULT_STREAM_BUFFER = 32 * 1024;
 
+    // TODO Add singleton constructor in a wrapper class.
+
+    // TODO Add constructor.
+
     @Override
     public void copyFileToFile(Path source, Path destination) throws IOException {
         Files.createDirectories(destination.getParent());

@@ -16,61 +16,61 @@
 	</properties>
 
     <modules>
-        <module>common-cache-core</module>
-        <module>common-cache-caffeine</module>
-        <module>common-cache-redis</module>
-        <module>common-cache-two-level</module>
+        <module>common-spring-cache-core</module>
+        <module>common-spring-cache-caffeine</module>
+        <module>common-spring-cache-redis</module>
+        <module>common-spring-cache-two-level</module>
         <module>common-file-core</module>
-        <module>common-file-spring</module>
         <module>common-file-azure-blob</module>
         <module>common-file-azure-file-share</module>
         <module>common-file-azure-storage</module>
-        <module>common-json</module>
+
+        <module>common-spring-file-core</module>
+        <module>common-spring-file-azure-blob</module>
+        <module>common-spring-file-azure-file-share</module>
+        <module>common-spring-file-azure-storage</module>
+        <module>common-spring-json</module>
 <!--        <module>common-model</module>-->
-        <module>common-rate-limiter</module>
-        <module>common-rate-limiter-token-bucket</module>
-        <module>common-security-context</module>
-        <module>common-security-core</module>
-        <module>common-security-cache</module>
-        <module>common-security-db</module>
+        <module>common-spring-rate-limiter</module>
+        <module>common-spring-rate-limiter-token-bucket</module>
+        <module>common-spring-security-context</module>
+        <module>common-spring-security-core</module>
+        <module>common-spring-security-cache</module>
+        <module>common-spring-security-db</module>
         <module>common-utils</module>
-        <module>common-web</module>
+        <module>common-stream</module>
+        <module>common-spring-web</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-cache</artifactId>
+                <artifactId>common-spring-cache</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-cache-caffeine</artifactId>
+                <artifactId>common-spring-cache-caffeine</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-cache-redis</artifactId>
+                <artifactId>common-spring-cache-redis</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-cache-two-level</artifactId>
+                <artifactId>common-spring-cache-two-level</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-file-core</artifactId>
-                <version>${common-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-file-spring</artifactId>
                 <version>${common-version}</version>
             </dependency>
             <dependency>
@@ -88,43 +88,63 @@
                 <artifactId>common-file-azure-storage</artifactId>
                 <version>${common-version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-json</artifactId>
+                <artifactId>common-spring-file-core</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-file-azure-blob</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-file-azure-file-share</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-file-azure-storage</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-rate-limiter</artifactId>
+                <artifactId>common-spring-json</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-rate-limiter-token-bucket</artifactId>
+                <artifactId>common-spring-rate-limiter</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-security-context</artifactId>
+                <artifactId>common-spring-rate-limiter-token-bucket</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-security-context</artifactId>
                 <version>${common-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-security-core</artifactId>
+                <artifactId>common-spring-security-core</artifactId>
                 <version>${common-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-security-cache</artifactId>
+                <artifactId>common-spring-security-cache</artifactId>
                 <version>${common-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-security-db</artifactId>
+                <artifactId>common-spring-security-db</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
@@ -137,7 +157,13 @@
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-web</artifactId>
+                <artifactId>common-stream</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-web</artifactId>
                 <version>${common-version}</version>
             </dependency>
         </dependencies>

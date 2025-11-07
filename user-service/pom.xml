@@ -71,42 +71,42 @@
         <!-- JSON -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-json</artifactId>
+            <artifactId>common-spring-json</artifactId>
         </dependency>
 
         <!-- Cache -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-cache-core</artifactId>
+            <artifactId>common-spring-cache-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-cache-caffeine</artifactId>
+            <artifactId>common-spring-cache-caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-cache-redis</artifactId>
+            <artifactId>common-spring-cache-redis</artifactId>
         </dependency>
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-cache-two-level</artifactId>
+            <artifactId>common-spring-cache-two-level</artifactId>
         </dependency>
 
         <!-- Rate Limiter -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-rate-limiter</artifactId>
+            <artifactId>common-spring-rate-limiter</artifactId>
         </dependency>
         <!-- Token Bucket Rate Limiter -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-rate-limiter-token-bucket</artifactId>
+            <artifactId>common-spring-rate-limiter-token-bucket</artifactId>
         </dependency>
 
         <!-- Security -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-security</artifactId>
+            <artifactId>common-spring-security</artifactId>
         </dependency>
 
         <!-- Utils -->

@@ -16,7 +16,4 @@ public interface AzureBlobFilePort {
                         String srcName,
                         BlobContainerClient dstContainer,
                         String dstName) throws IOException;
-
-    void copyAzureSideBlobToBlob(String sourceBlobUrl, String targetAccountUrl,
-                                 String targetContainer, String targetBlobName);
 }
