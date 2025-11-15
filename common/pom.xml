@@ -22,13 +22,13 @@
         <module>common-spring-cache-two-level</module>
         <module>common-file-core</module>
         <module>common-file-azure-blob</module>
-        <module>common-file-azure-file-share</module>
-        <module>common-file-azure-storage</module>
+<!--        <module>common-file-azure-file-share</module>-->
+<!--        <module>common-file-azure-storage</module>-->
 
         <module>common-spring-file-core</module>
         <module>common-spring-file-azure-blob</module>
-        <module>common-spring-file-azure-file-share</module>
-        <module>common-spring-file-azure-storage</module>
+<!--        <module>common-spring-file-azure-file-share</module>-->
+<!--        <module>common-spring-file-azure-storage</module>-->
         <module>common-spring-json</module>
 <!--        <module>common-model</module>-->
         <module>common-spring-rate-limiter</module>
@@ -46,7 +46,7 @@
         <dependencies>
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-spring-cache</artifactId>
+                <artifactId>common-spring-cache-core</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
@@ -78,16 +78,16 @@
                 <artifactId>common-file-azure-blob</artifactId>
                 <version>${common-version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-file-azure-file-share</artifactId>
-                <version>${common-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-file-azure-storage</artifactId>
-                <version>${common-version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.mariosmant.webapp.mediahub</groupId>-->
+<!--                <artifactId>common-file-azure-file-share</artifactId>-->
+<!--                <version>${common-version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.mariosmant.webapp.mediahub</groupId>-->
+<!--                <artifactId>common-file-azure-storage</artifactId>-->
+<!--                <version>${common-version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-spring-file-core</artifactId>
@@ -98,16 +98,16 @@
                 <artifactId>common-spring-file-azure-blob</artifactId>
                 <version>${common-version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-spring-file-azure-file-share</artifactId>
-                <version>${common-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mariosmant.webapp.mediahub</groupId>
-                <artifactId>common-spring-file-azure-storage</artifactId>
-                <version>${common-version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.mariosmant.webapp.mediahub</groupId>-->
+<!--                <artifactId>common-spring-file-azure-file-share</artifactId>-->
+<!--                <version>${common-version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.mariosmant.webapp.mediahub</groupId>-->
+<!--                <artifactId>common-spring-file-azure-storage</artifactId>-->
+<!--                <version>${common-version}</version>-->
+<!--            </dependency>-->
 
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>

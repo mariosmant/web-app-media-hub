@@ -106,7 +106,7 @@
         <!-- Security -->
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-spring-security</artifactId>
+            <artifactId>common-spring-security-core</artifactId>
         </dependency>
 
         <!-- Utils -->

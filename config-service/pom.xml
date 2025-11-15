@@ -48,8 +48,7 @@
 
         <dependency>
             <groupId>com.mariosmant.webapp.mediahub</groupId>
-            <artifactId>common-security</artifactId>
-            <version>${common-version}</version>
+            <artifactId>common-spring-security-core</artifactId>
         </dependency>
 
         <dependency>

@@ -40,26 +40,27 @@ server:
 
 app:
   security:
-    # Issuer URI for the "private" realm
-    issuer-uri: https://localhost:8443/iam-service/realms/private
+    jwt:
+      # Issuer URI for the "private" realm
+      issuer: https://localhost:8443/iam-service/realms/private
 
     # JWK Set URI for JWT validation
-    #jwk-set-uri: https://localhost:8443/iam-service/realms/private/protocol/openid-connect/certs
+      jwk-set-uri: https://localhost:8443/iam-service/realms/private/protocol/openid-connect/certs
 
     # Expected audiences (list of resource identifiers your API accepts)
     audiences:
       - config-server
 
-    # Introspection endpoint for opaque tokens
-    introspection-uri: ${INTROSPECTION_URI}
-
-    # Client certificate keystore (for mTLS)
-    introspection-keystore-path: ${INTROSPECTION_KEYSTORE_PATH}
-    introspection-keystore-password: ${INTROSPECTION_KEYSTORE_PASSWORD}
-
-    # Truststore containing Keycloak server cert or CA
-    introspection-truststore-path: ${INTROSPECTION_TRUSTSTORE_PATH}
-    introspection-truststore-password: ${INTROSPECTION_TRUSTSTORE_PASSWORD}
+#    # Introspection endpoint for opaque tokens
+#    introspection-uri: ${INTROSPECTION_URI}
+#
+#    # Client certificate keystore (for mTLS)
+#    introspection-keystore-path: ${INTROSPECTION_KEYSTORE_PATH}
+#    introspection-keystore-password: ${INTROSPECTION_KEYSTORE_PASSWORD}
+#
+#    # Truststore containing Keycloak server cert or CA
+#    introspection-truststore-path: ${INTROSPECTION_TRUSTSTORE_PATH}
+#    introspection-truststore-password: ${INTROSPECTION_TRUSTSTORE_PASSWORD}
 
 
 management:
@@ -86,8 +87,8 @@ management:
 logging:
   config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
   level:
-    root: DEBUG
-    org.springframework.web: DEBUG                 # Detailed request mapping logs
-    org.springframework.security: DEBUG            # See auth flow
-    org.springframework.boot.autoconfigure: DEBUG # See which auto-configs are applied
+    root: INFO
+    org.springframework.web: INFO                 # Detailed request mapping logs
+    org.springframework.security: INFO            # See auth flow
+    org.springframework.boot.autoconfigure: INFO # See which auto-configs are applied
     org.apache.catalina: INFO                       # Embedded Tomcat startup info

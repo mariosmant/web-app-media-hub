@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+// TODO refactor.
 public class AzureFileShareFileService implements AzureFileShareFilePort {
 
     private static final int DEFAULT_COPY_FILE_TO_FILE_IO_BUFFER = 32 * 1024;

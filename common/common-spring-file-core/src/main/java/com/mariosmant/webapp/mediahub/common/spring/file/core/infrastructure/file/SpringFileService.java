@@ -1,5 +1,6 @@
 package com.mariosmant.webapp.mediahub.common.file.spring.infrastructure.file;
 
+import com.mariosmant.webapp.mediahub.common.file.core.infrastructure.file.FileService;
 import com.mariosmant.webapp.mediahub.common.file.core.domain.port.FilePort;
 import com.mariosmant.webapp.mediahub.common.file.spring.domain.port.SpringFilePort;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public class SpringFileService extends FileService implements SpringFilePort {
     @Override
     public void multipartFileToFile(MultipartFile multipartFile, Path destination) throws IOException {
         try (InputStream in = multipartFile.getInputStream()) {
-            filePort.writeInputStreamToFile(in, destination);
+            this.writeInputStreamToFile(in, destination);
         }
     }
 }

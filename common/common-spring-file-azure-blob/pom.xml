@@ -45,6 +45,11 @@
             <artifactId>common-spring-file-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.mariosmant.webapp.mediahub</groupId>
+            <artifactId>common-file-azure-blob</artifactId>
+        </dependency>
+
 
     </dependencies>
 

@@ -1,2 +1,2 @@
-com.mariosmant.webapp.mediahub.common.security.core.infrastructure.spring.config.SecurityConfig
-com.mariosmant.webapp.mediahub.common.security.core.infrastructure.spring.config.JwtDecoderConfig
+com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.config.SecurityConfig
+com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.config.JwtDecoderConfig
