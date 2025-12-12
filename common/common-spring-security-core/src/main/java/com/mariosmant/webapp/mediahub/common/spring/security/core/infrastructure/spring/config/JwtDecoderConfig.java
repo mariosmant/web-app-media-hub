@@ -29,7 +29,7 @@ public class JwtDecoderConfig {
                 .withJwkSetUri(props.getJwkSetUri())
                 // Algorithm pinning: RSA-PSS (PS256) only.
                 .jwsAlgorithms(signatureAlgorithms ->
-                        props.getValidatorPolicy().algorithmPolicy().allowedAlgs().forEach(alg -> signatureAlgorithms.add(SignatureAlgorithm.valueOf(alg)))).build();
+                        props.getValidatorPolicy().getAlgorithmPolicy().getAllowedAlgs().forEach(alg -> signatureAlgorithms.add(SignatureAlgorithm.valueOf(alg)))).build();
         decoder.setJwtValidator(compositeValidator);
         return decoder;
     }
@@ -45,35 +45,38 @@ public class JwtDecoderConfig {
                 () -> JwtValidators.createDefaultWithIssuer(props.getIssuer()), validators);
 
         addValidatorIf(validatorPolicy.isAlgorithm(),
-                () -> new AlgorithmValidator(validatorPolicy.getAlgorithmPolicy().allowedAlgs()), validators);
+                () -> new AlgorithmValidator(validatorPolicy.getAlgorithmPolicy().getAllowedAlgs()), validators);
 
         addValidatorIf(validatorPolicy.isTypHeader(),
-                () -> new TypHeaderValidator(validatorPolicy.getHeaderPolicy().allowedTypHeaders()), validators);
+                () -> new TypHeaderValidator(validatorPolicy.getHeaderPolicy().getAllowedTypHeaders()), validators);
 
         addValidatorIf(validatorPolicy.isAudience(),
-                () -> new AudienceValidator(validatorPolicy.getClaimPolicy().requiredAudiences()), validators);
+                () -> new AudienceValidator(validatorPolicy.getClaimPolicy().getRequiredAudiences()), validators);
 
         addValidatorIf(validatorPolicy.isAuthorizedParty(),
-                () -> new AuthorizedPartyValidator(validatorPolicy.getClaimPolicy().allowedAzp()), validators);
+                () -> new AuthorizedPartyValidator(validatorPolicy.getClaimPolicy().getAllowedAzp()), validators);
 
         addValidatorIf(validatorPolicy.isScope(),
-                () -> new ScopeValidator(validatorPolicy.getClaimPolicy().requiredScopes()), validators);
+                () -> new ScopeValidator(validatorPolicy.getClaimPolicy().getRequiredScopes()), validators);
 
-        addValidatorIf(validatorPolicy.isSubjectFormat(),
-                () -> new SubjectFormatValidator(validatorPolicy.getClaimPolicy().subjectPattern()), validators);
+        boolean isUserSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsUser();
+        boolean isServiceAccountSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsServiceAccount();
+        addValidatorIf(isUserSubject || isServiceAccountSubject,
+                () -> new SubjectFormatValidator(validatorPolicy.getClaimPolicy().getClaimSubjectPolicy(), validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().getServiceAccountSubjectClientIds()), validators);
 
         addValidatorIf(validatorPolicy.isExpNbfSkew(),
-                () -> new ExpNbfSkewValidator(validatorPolicy.getClaimPolicy().clockSkew()), validators);
+                () -> new ExpNbfSkewValidator(validatorPolicy.getClaimPolicy().getClockSkew()), validators);
 
         addValidatorIf(validatorPolicy.isKid(),
-                () -> new KidValidator(validatorPolicy.getHeaderPolicy().enforceKidPinning(),
-                        validatorPolicy.getHeaderPolicy().allowedKids()), validators);
+                () -> new KidValidator(validatorPolicy.getHeaderPolicy().isEnforceKidPinning(),
+                        validatorPolicy.getHeaderPolicy().getAllowedKids()), validators);
 
         addValidatorIf(validatorPolicy.isTenant(),
                 TenantValidator::new, validators);
 
         if (validatorPolicy.isJti()) {
-            jtiStoreProvider.ifAvailable(store -> validators.add(new JtiReplayValidator(store)));
+            jtiStoreProvider.orderedStream()
+                    .forEach(store -> validators.add(new JtiReplayValidator(store)));
         }
 
         return new CompositeJwtValidator(validators);

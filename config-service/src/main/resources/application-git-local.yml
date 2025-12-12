@@ -52,6 +52,90 @@ server:
   #    trust-store: classpath:tls/config-server-truststore.p12
   #    trust-store-password: ${CONFIG_SERVER_TRUSTSTORE_PASSWORD}
   #    client-auth: need
+#
+
+app:
+  security:
+    jwt:
+      issuer: https://localhost/iam-service/realms/private
+      jwk-set-uri: https://localhost/iam-service/realms/private/protocol/openid-connect/certs
+      auth-mode: jwt
+      validator-policy:
+        issuer: true
+        algorithm: true
+        typ-header: true
+        audience: true
+        authorized-party: true
+        scope: true
+        exp-nbf-skew: true
+        kid: false
+        tenant: true
+        jti: true
+        algorithm-policy:
+          allowed-algs:
+            - RS256
+        header-policy:
+          allowed-typ-headers:
+            - JWT
+        claim-policy:
+          required-audiences:
+            - config-service
+          allowed-azp:
+            - admin-portal
+            - user-service
+          required-scopes:
+            - read:properties
+          claim-subject-policy:
+            subject-is-user: true
+            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+            subject-is-service-account: true
+            service-account-subject-client-ids:
+              - user-service
+            #service-account-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+          clock-skew: PT30S                         # 30 seconds tolerance
+          jti-cache-ttl: PT5M                       # 5 minutes replay protection
+
+
+
+
+#app:
+#  security:
+#    jwt:
+#      issuer: https://localhost/iam-service/realms/private
+#      validatorPolicy:
+#        issuer: true
+#        algorithm: true
+#        typHeader: true
+#        audience: true
+#        authorizedParty: true
+#        scope: true
+#        expNbfSkew: true
+#        kid: false
+#        tenant: true
+#        jti: true
+#        algorithmPolicy:
+#          allowedAlgs:
+#            - RS256
+#        headerPolicy:
+#          allowed-typ-headers:
+#            - JWT
+#        claimPolicy:
+#          required-audiences:
+#            - config-service
+#          allowed-azp:
+#            - admin-portal
+#            - user-service
+#          required-scopes:
+#            - read:properties
+#          claimSubjectPolicy:
+#            subjectIsUser: true
+#            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+#            subjectIsServiceAccount: true
+#            serviceAccountSubjectClientIds:
+#              - user-service
+#            #service-account-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+#          clock-skew: PT30S                         # 30 seconds tolerance
+#          jti-cache-ttl: PT5M                       # 5 minutes replay protection
 
 management:
   endpoints:

@@ -1,19 +1,16 @@
 package com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.properties;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Set;
 
-public final class HeaderPolicy {
-    private final Set<String> allowedTypHeaders; // e.g., JWT
-    private final boolean enforceKidPinning;
-    private final Set<String> allowedKids;
-
-    public HeaderPolicy(Set<String> allowedTypHeaders, boolean enforceKidPinning, Set<String> allowedKids) {
-        this.allowedTypHeaders = allowedTypHeaders == null ? Set.of() : Set.copyOf(allowedTypHeaders);
-        this.enforceKidPinning = enforceKidPinning;
-        this.allowedKids = allowedKids == null ? Set.of() : Set.copyOf(allowedKids);
-    }
-
-    public Set<String> allowedTypHeaders() { return allowedTypHeaders; }
-    public boolean enforceKidPinning() { return enforceKidPinning; }
-    public Set<String> allowedKids() { return allowedKids; }
+@Getter
+@Setter
+@NoArgsConstructor
+public class HeaderPolicy {
+    private Set<String> allowedTypHeaders; // e.g., JWT
+    private boolean enforceKidPinning;
+    private Set<String> allowedKids;
 }

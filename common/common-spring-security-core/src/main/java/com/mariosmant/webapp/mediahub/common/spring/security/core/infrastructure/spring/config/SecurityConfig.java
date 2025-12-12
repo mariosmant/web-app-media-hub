@@ -3,16 +3,26 @@ package com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructur
 //import domain.bucket.token.limiter.rate.com.mariosmant.webapp.mediahub.common.web.TokenBucketRateLimiter;
 import com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.properties.AppSecurityProperties;
 import com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.properties.CorsProperties;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.*;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.authentication.OpaqueTokenAuthenticationProvider;
+import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -23,7 +33,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                            CorsProperties corsProps,
-                                           AuthenticationManager authenticationManager) throws Exception {
+                                                   AuthenticationManagerResolver<HttpServletRequest> resolver) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
@@ -47,11 +57,99 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 //                .addFilterBefore(new TokenBucketRateLimiter(), BasicAuthenticationFilter.class)
-                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
-//                .oauth2ResourceServer(oauth -> oauth
-//                        .authenticationManagerResolver(request -> authenticationManager));
+                //.oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
+//                .oauth2ResourceServer(oauth -> {
+//                            OpaqueTokenIntrospector introspector = introspectorProvider.getIfAvailable();
+//                            switch (props.getAuthMode()) {
+//                                case "jwt" -> oauth.jwt(jwt -> jwt.decoder(jwtDecoder));
+//                                case "introspection" -> {
+//                                    nullSafeCheckIntrospector(introspector);
+//                                    oauth.opaqueToken(opaque -> opaque.introspector(introspector)); // TODO null checks.
+//                                }
+//                                case "auto" -> oauth.authenticationManagerResolver(request -> {
+//                                    String token = extractToken(request);
+//                                    if (isJwt(token)) {
+//                                        return new ProviderManager(new JwtAuthenticationProvider(jwtDecoder));
+//                                    } else {
+//                                        nullSafeCheckIntrospector(introspector);
+//                                        return new ProviderManager(new OpaqueTokenAuthenticationProvider(introspector));
+//                                    }
+//                                });
+//                                case "both" -> oauth.authenticationManagerResolver(request -> {
+//                                    String token = extractToken(request);
+//                                    nullSafeCheckIntrospector(introspector);
+//
+//                                    if (isJwt(token)) {
+//                                        return new ProviderManager(new JwtAndIntrospectionProvider(jwtDecoder, introspector, null));
+//                                    } else {
+//                                        // Opaque path: introspection only
+//                                        return new ProviderManager(new OpaqueTokenAuthenticationProvider(introspector));
+//                                    }
+//                                });
+//
+//                                default -> throw new IllegalStateException("Unknown auth mode: " + props.getAuthMode());
+//                            }});
+                .oauth2ResourceServer(oauth -> oauth.authenticationManagerResolver(resolver));
         return http.build();
     }
+
+    private void nullSafeCheckIntrospector(OpaqueTokenIntrospector introspector) throws IllegalStateException {
+        if(introspector == null) {
+            throw new IllegalStateException("Could not find introspector");
+        }
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        return (header != null && header.startsWith("Bearer ")) ? header.substring(7) : null;
+    }
+
+    private boolean isJwt(String token) {
+        // Simple heuristic: JWTs have 3 dot-separated parts
+        return token != null && token.split("\\.").length == 3;
+    }
+
+    @Bean
+    public AuthenticationManagerResolver<HttpServletRequest> authenticationManagerResolver(
+            AppSecurityProperties props,
+            JwtDecoder jwtDecoder,
+            ObjectProvider<OpaqueTokenIntrospector> introspectorProvider) {
+
+        OpaqueTokenIntrospector introspector = introspectorProvider.getIfAvailable();
+
+        return request -> {
+            String token = extractToken(request);
+
+            switch (props.getAuthMode()) {
+                case "jwt":
+                    return new ProviderManager(new JwtAuthenticationProvider(jwtDecoder));
+
+                case "introspection":
+                    nullSafeCheckIntrospector(introspector);
+                    return new ProviderManager(new OpaqueTokenAuthenticationProvider(introspector));
+
+                case "auto":
+                    if (isJwt(token)) {
+                        return new ProviderManager(new JwtAuthenticationProvider(jwtDecoder));
+                    } else {
+                        nullSafeCheckIntrospector(introspector);
+                        return new ProviderManager(new OpaqueTokenAuthenticationProvider(introspector));
+                    }
+
+                case "both":
+                    nullSafeCheckIntrospector(introspector);
+                    if (isJwt(token)) {
+                        return new ProviderManager(new JwtAndIntrospectionProvider(jwtDecoder, introspector, null));
+                    } else {
+                        return new ProviderManager(new OpaqueTokenAuthenticationProvider(introspector));
+                    }
+
+                default:
+                    throw new IllegalStateException("Unknown auth mode: " + props.getAuthMode());
+            }
+        };
+    }
+
 
 //    @Bean
 //    AuthenticationManager authenticationManager(JwtDecoder jwtDecoder,

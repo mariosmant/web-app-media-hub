@@ -1,14 +1,15 @@
 package com.mariosmant.webapp.mediahub.common.spring.security.core.infrastructure.spring.properties;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Set;
 
-public final class AlgorithmPolicy {
-    private final Set<String> allowedAlgs; // e.g., PS256
-
-    public AlgorithmPolicy(Set<String> allowedAlgs) {
-        this.allowedAlgs = allowedAlgs == null ? Set.of() : Set.copyOf(allowedAlgs);
-    }
-
-    public Set<String> allowedAlgs() { return allowedAlgs; }
+@Getter
+@Setter
+@NoArgsConstructor
+public class AlgorithmPolicy {
+    private Set<String> allowedAlgs; // e.g., PS256
 }
 
