@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [tid:%tid, tn:%t] %-5p %c{1}.%M:%L %X{username} - %m%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root>
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
