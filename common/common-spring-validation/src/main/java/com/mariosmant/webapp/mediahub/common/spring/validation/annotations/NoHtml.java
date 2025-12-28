@@ -1,5 +1,6 @@
-package com.mariosmant.webapp.mediahub.common.utils.web.annotations;
+package com.mariosmant.webapp.mediahub.common.spring.validation.annotations;
 
+import com.mariosmant.webapp.mediahub.common.spring.validation.validators.NoHtmlValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -15,11 +16,3 @@ public @interface NoHtml {
     Class<? extends Payload>[] payload() default {};
 }
 
-class NoHtmlValidator implements jakarta.validation.ConstraintValidator<NoHtml, String> {
-    @Override
-    public boolean isValid(String value, jakarta.validation.ConstraintValidatorContext context) {
-        if (value == null) return true;
-        String v = value.trim();
-        return !(v.contains("<") || v.contains(">"));
-    }
-}

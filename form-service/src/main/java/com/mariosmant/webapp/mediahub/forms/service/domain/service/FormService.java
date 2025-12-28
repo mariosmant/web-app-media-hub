@@ -45,16 +45,16 @@ public class FormService {
         Instant now = Instant.now();
 
         // 1. Application-level validation
-        validateFiles(files);
-        validateUserExists(req.getUsername());
-        validateActorPermissions(actor, action);
-        validateBusinessPreconditions(req);
+//        validateFiles(files);
+//        validateUserExists(req.getUsername());
+//        validateActorPermissions(actor, action);
+//        validateBusinessPreconditions(req);
 
         // 2. Domain creation (domain invariants inside)
-        Form form = Form.create(req, now); // domain-level validation inside constructor
+        Form form = new Form();//Form.create(req, now); // domain-level validation inside constructor
 
         // 3. Persist
-        String id = formRepository.save(form);
+        String id = "test";//formRepository.save(form);
 
         // 4. Side effects
         audit.recordEvent(actor, action, id, Map.of("username", form.getUsername()), now);

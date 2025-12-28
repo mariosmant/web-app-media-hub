@@ -37,6 +37,7 @@
         <module>common-spring-security-core</module>
         <module>common-spring-security-cache</module>
         <module>common-spring-security-db</module>
+        <module>common-spring-validation</module>
         <module>common-utils</module>
         <module>common-stream</module>
         <module>common-spring-web</module>
@@ -145,6 +146,12 @@
             <dependency>
                 <groupId>com.mariosmant.webapp.mediahub</groupId>
                 <artifactId>common-spring-security-db</artifactId>
+                <version>${common-version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.mariosmant.webapp.mediahub</groupId>
+                <artifactId>common-spring-validation</artifactId>
                 <version>${common-version}</version>
             </dependency>
 
