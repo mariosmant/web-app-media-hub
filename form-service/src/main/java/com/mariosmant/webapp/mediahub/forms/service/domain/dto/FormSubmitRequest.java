@@ -3,10 +3,10 @@ package com.mariosmant.webapp.mediahub.forms.service.domain.dto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mariosmant.webapp.mediahub.common.spring.validation.annotations.ValidCountryPostalCode;
 import com.mariosmant.webapp.mediahub.common.spring.validation.contract.PostalCodeValidationData;
-import com.mariosmant.webapp.mediahub.common.spring.validation.annotations.CountryCode;
 import com.mariosmant.webapp.mediahub.common.spring.validation.annotations.Money;
 import com.mariosmant.webapp.mediahub.common.spring.validation.annotations.NoHtml;
 import com.mariosmant.webapp.mediahub.common.utils.BigDecimalUtils;
+import com.mariosmant.webapp.mediahub.forms.service.validation.providers.FormCountryCountryPostalCodePatternProvider;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +16,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
-@ValidCountryPostalCode
+@ValidCountryPostalCode(validateCountry = true, provider = FormCountryCountryPostalCodePatternProvider.class)
 public class FormSubmitRequest implements PostalCodeValidationData {
     // Person related.
     @NotBlank @Size(max = 64) @NoHtml
@@ -37,9 +36,8 @@ public class FormSubmitRequest implements PostalCodeValidationData {
     @NotBlank
     @Size(min = 2, max = 2)
     @NoHtml
-    @CountryCode
+    @Pattern(regexp = "^[a-z]{2}$")
     private String country;
-
 
     @NotBlank @Size(max = 80)
     @Pattern(regexp = "^[\\p{L} .'-]+$", message = "Invalid name")
@@ -82,11 +80,10 @@ public class FormSubmitRequest implements PostalCodeValidationData {
 
     private boolean enabled;
 
-    // Optional: enforce scale automatically
+    // Enforce scale automatically
     public void setPayAmount(BigDecimal payAmount) {
         this.payAmount = BigDecimalUtils.scale(payAmount, 2, RoundingMode.HALF_UP);
     }
-
 
     @Override
     public String postalCodeValidationCountry() {

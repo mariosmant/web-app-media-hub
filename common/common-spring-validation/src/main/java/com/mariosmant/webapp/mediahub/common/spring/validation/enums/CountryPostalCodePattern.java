@@ -1,6 +1,6 @@
 package com.mariosmant.webapp.mediahub.common.spring.validation.enums;
 
-public enum PostalCodePattern {
+public enum CountryPostalCodePattern {
 
     US("US", "^[0-9]{5}(?:-[0-9]{4})?$"),
     CA("CA", "^[A-Za-z]\\d[A-Za-z][ -]?\\d[A-Za-z]\\d$"),
@@ -54,7 +54,7 @@ public enum PostalCodePattern {
     private final String countryCode;
     private final String regex;
 
-    PostalCodePattern(String countryCode, String regex) {
+    CountryPostalCodePattern(String countryCode, String regex) {
         this.countryCode = countryCode;
         this.regex = regex;
     }
