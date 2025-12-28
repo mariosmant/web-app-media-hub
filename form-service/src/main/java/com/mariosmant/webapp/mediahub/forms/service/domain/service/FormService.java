@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,26 +30,45 @@ public class FormService {
     }
 
     @Transactional
-    public String submitForm(String actor, FormSubmitRequest req) {
-        // TODO Replace sample.
-        Form form = new Form(null, req.getUsername(), req.getEmail(), req.getFirstName(), req.getLastName(), req.isEnabled(), Instant.now());
-        String id = "test";
-        audit.recordEvent(actor, "FORM_SUBMITTED", id, Map.of("username", form.getUsername()), Instant.now());
+    public String submitForm(FormSubmitRequest req) {
+        return submitFormInternal(req, null, "FORM_SUBMITTED");
+    }
 
+    @Transactional
+    public String submitFormMultipart(FormSubmitRequest req, Map<String, List<MultipartFile>> files) {
+        return submitFormInternal(req, files, "FORM_SUBMITTED_MULTIPART");
+    }
+
+    private String submitFormInternal(FormSubmitRequest req, Map<String, List<MultipartFile>> files, String action) {
+        String actor = "testactor";
+
+        Instant now = Instant.now();
+
+        // 1. Application-level validation
+        validateFiles(files);
+        validateUserExists(req.getUsername());
+        validateActorPermissions(actor, action);
+        validateBusinessPreconditions(req);
+
+        // 2. Domain creation (domain invariants inside)
+        Form form = Form.create(req, now); // domain-level validation inside constructor
+
+        // 3. Persist
+        String id = formRepository.save(form);
+
+        // 4. Side effects
+        audit.recordEvent(actor, action, id, Map.of("username", form.getUsername()), now);
         evictFormCacheAfterCommit(id);
-
         return id;
     }
 
-    private void evictFormCacheAfterCommit(String id) {
+    private void evictFormCacheAfterCommit(String id) throws IllegalStateException {
         Objects.requireNonNull(id, "id must not be null");
-
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
             throw new IllegalStateException(
                     "evictUserCacheAfterCommit must be called within an active transaction"
             );
         }
-
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
