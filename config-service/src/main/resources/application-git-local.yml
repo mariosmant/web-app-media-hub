@@ -33,8 +33,6 @@ spring:
 #          strict-host-key-checking: true
   jackson:
     time-zone: UTC
-    serialization:
-      write-dates-as-timestamps: false
 
 server:
   port: 8888

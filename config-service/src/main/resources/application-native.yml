@@ -6,11 +6,10 @@ spring:
     config:
       server:
         native:
-          search-locations: file:${CONFIG_REPO_DIR:../config/services}
+          search-locations: file:${CONFIG_REPO_DIR:../config/services}/upload-service/
   jackson:
     time-zone: UTC
-    serialization:
-      write-dates-as-timestamps: false
+
 #  security:
 #    oauth2:
 #      resourceserver:
@@ -38,45 +37,39 @@ server:
   #    trust-store-password: ${CONFIG_SERVER_TRUSTSTORE_PASSWORD}
   #    client-auth: need
 
-app:
-  security:
-    jwt:
-      issuer: https://localhost/iam-service/realms/private
-      jwk-set-uri: https://localhost/iam-service/realms/private/protocol/openid-connect/certs
-      auth-mode: jwt
-      validator-policy:
-        issuer: true
-        algorithm: true
-        typ-header: true
-        audience: true
-        authorized-party: true
-        scope: true
-        exp-nbf-skew: true
-        kid: false
-        tenant: true
-        jti: true
-        algorithm-policy:
-          allowed-algs:
-            - RS256
-        header-policy:
-          allowed-typ-headers:
-            - JWT
-        claim-policy:
-          required-audiences:
-            - config-service
-          allowed-azp:
-            - user-service
-          required-scopes:
-            - read:properties
-          claim-subject-policy:
-            subject-is-user: true
-            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
-            subject-is-service-account: true
-            service-account-subject-client-ids:
-              - user-service
-            #service-account-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
-          clock-skew: PT30S                         # 30 seconds tolerance
-          jti-cache-ttl: PT5M                       # 5 minutes replay protection
+#app:
+#  security:
+#    jwt:
+#      issuer: https://localhost/iam-service/realms/private
+#      jwk-set-uri: https://localhost/iam-service/realms/private/protocol/openid-connect/certs
+#      auth-mode: jwt
+#      validator-policy:
+#        issuer: false
+#        algorithm: false
+#        typ-header: false
+#        audience: false
+#        authorized-party: false
+#        scope: false
+#        exp-nbf-skew: false
+#        kid: false
+#        tenant: false
+#        jti: false
+#        algorithm-policy:
+#          allowed-algs:
+#            - RS256
+#        header-policy:
+#          allowed-typ-headers:
+#            - JWT
+#        claim-policy:
+#          required-scopes:
+#            - read:properties
+#          claim-subject-policy:
+#            subject-is-user: true
+#            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+#            subject-is-service-account: true
+#            service-account-subject-client-ids:
+#              - user-service
+#              - upload-service
 
 
 #app:

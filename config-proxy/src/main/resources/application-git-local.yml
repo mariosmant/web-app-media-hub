@@ -1,0 +1,168 @@
+spring:
+  config:
+    activate:
+      on-profile: git-local
+  cloud:
+    config:
+      server:
+        git:
+          # SSH URL to your private config repositories
+          uri: ${CONFIG_GIT_URI}
+          # Use a fixed local working directory for clones/caches
+          basedir: ${CONFIG_GIT_BASEDIR:/var/lib/config-server/git}
+          # Limit what is searched to well-defined subfolders
+          search-paths: ${CONFIG_SEARCH_PATHS:services}
+          # Branch/tag to read from (default to main)
+          default-label: ${CONFIG_GIT_BRANCH:main}
+          # Fail fast if cloning fails on startup
+          clone-on-start: true
+          # Network stability settings
+          timeout: 20
+          # Always pull latest changes, even if non-fast-forward
+          force-pull: true
+          # HTTPS authentication to Git
+          skip-ssl-validation: false
+          username: ${CONFIG_GIT_USERNAME}
+          password: ${CONFIG_GIT_PASSWORD}
+#          # SSH authentication to Git
+#          private-key: ${CONFIG_GIT_SSH_KEY}
+#          passphrase: ${CONFIG_GIT_SSH_PASSPHRASE}
+#          # Host key pinning / strict checking (recommended in prod)
+#          known-hosts-file: ${CONFIG_GIT_KNOWN_HOSTS:/etc/ssh/ssh_known_hosts}
+#          ignore-local-ssh-settings: true
+#          strict-host-key-checking: true
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8888
+  shutdown: graceful
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1KB
+  # mTLS placeholders for later (Istio/Kong re-encrypt)
+  #  ssl:
+  #    enabled: true
+  #    key-store: classpath:tls/config-server-keystore.p12
+  #    key-store-password: ${CONFIG_SERVER_KEYSTORE_PASSWORD}
+  #    key-store-type: PKCS12
+  #    trust-store: classpath:tls/config-server-truststore.p12
+  #    trust-store-password: ${CONFIG_SERVER_TRUSTSTORE_PASSWORD}
+  #    client-auth: need
+#
+
+app:
+  security:
+    jwt:
+      issuer: https://localhost/iam-service/realms/private
+      jwk-set-uri: https://localhost/iam-service/realms/private/protocol/openid-connect/certs
+      auth-mode: jwt
+      validator-policy:
+        issuer: true
+        algorithm: true
+        typ-header: true
+        audience: true
+        authorized-party: true
+        scope: true
+        exp-nbf-skew: true
+        kid: false
+        tenant: true
+        jti: true
+        algorithm-policy:
+          allowed-algs:
+            - RS256
+        header-policy:
+          allowed-typ-headers:
+            - JWT
+        claim-policy:
+          required-audiences:
+            - config-service
+          allowed-azp:
+            - admin-portal
+            - user-service
+          required-scopes:
+            - read:properties
+          claim-subject-policy:
+            subject-is-user: true
+            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+            subject-is-service-account: true
+            service-account-subject-client-ids:
+              - user-service
+            #service-account-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+          clock-skew: PT30S                         # 30 seconds tolerance
+          jti-cache-ttl: PT5M                       # 5 minutes replay protection
+
+
+
+
+#app:
+#  security:
+#    jwt:
+#      issuer: https://localhost/iam-service/realms/private
+#      validatorPolicy:
+#        issuer: true
+#        algorithm: true
+#        typHeader: true
+#        audience: true
+#        authorizedParty: true
+#        scope: true
+#        expNbfSkew: true
+#        kid: false
+#        tenant: true
+#        jti: true
+#        algorithmPolicy:
+#          allowedAlgs:
+#            - RS256
+#        headerPolicy:
+#          allowed-typ-headers:
+#            - JWT
+#        claimPolicy:
+#          required-audiences:
+#            - config-service
+#          allowed-azp:
+#            - admin-portal
+#            - user-service
+#          required-scopes:
+#            - read:properties
+#          claimSubjectPolicy:
+#            subjectIsUser: true
+#            #user-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+#            subjectIsServiceAccount: true
+#            serviceAccountSubjectClientIds:
+#              - user-service
+#            #service-account-subject-pattern: "^[0-9a-fA-F\\-]{36}$"   # UUID regex
+#          clock-skew: PT30S                         # 30 seconds tolerance
+#          jti-cache-ttl: PT5M                       # 5 minutes replay protection
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+  observations:
+    key-values:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+
+logging:
+  config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
+  level:
+    root: DEBUG
+    org.springframework.web: DEBUG                 # Detailed request mapping logs
+    org.springframework.security: DEBUG            # See auth flow
+    org.springframework.boot.autoconfigure: DEBUG # See which auto-configs are applied
+    org.apache.catalina: INFO                       # Embedded Tomcat startup info

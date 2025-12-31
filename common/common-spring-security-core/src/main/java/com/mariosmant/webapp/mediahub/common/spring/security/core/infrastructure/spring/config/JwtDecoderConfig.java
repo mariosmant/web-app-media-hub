@@ -38,8 +38,10 @@ public class JwtDecoderConfig {
     public OAuth2TokenValidator<Jwt> compositeValidator(AppSecurityProperties props,
                                                         ObjectProvider<JtiStore> jtiStoreProvider) {
         ValidatorPolicy validatorPolicy = props.getValidatorPolicy();
-
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
+        if(validatorPolicy == null) {
+            return new CompositeJwtValidator(validators);
+        }
 
         addValidatorIf(validatorPolicy.isIssuer(),
                 () -> JwtValidators.createDefaultWithIssuer(props.getIssuer()), validators);
@@ -59,10 +61,12 @@ public class JwtDecoderConfig {
         addValidatorIf(validatorPolicy.isScope(),
                 () -> new ScopeValidator(validatorPolicy.getClaimPolicy().getRequiredScopes()), validators);
 
-        boolean isUserSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsUser();
-        boolean isServiceAccountSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsServiceAccount();
-        addValidatorIf(isUserSubject || isServiceAccountSubject,
-                () -> new SubjectFormatValidator(validatorPolicy.getClaimPolicy().getClaimSubjectPolicy(), validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().getServiceAccountSubjectClientIds()), validators);
+        if(validatorPolicy.getClaimPolicy() != null && validatorPolicy.getClaimPolicy().getClaimSubjectPolicy() != null) {
+            boolean isUserSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsUser();
+            boolean isServiceAccountSubject = validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().isSubjectIsServiceAccount();
+            addValidatorIf(isUserSubject || isServiceAccountSubject,
+                    () -> new SubjectFormatValidator(validatorPolicy.getClaimPolicy().getClaimSubjectPolicy(), validatorPolicy.getClaimPolicy().getClaimSubjectPolicy().getServiceAccountSubjectClientIds()), validators);
+        }
 
         addValidatorIf(validatorPolicy.isExpNbfSkew(),
                 () -> new ExpNbfSkewValidator(validatorPolicy.getClaimPolicy().getClockSkew()), validators);

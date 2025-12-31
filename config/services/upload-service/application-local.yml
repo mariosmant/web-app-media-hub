@@ -1,0 +1,205 @@
+spring:
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: MediaHubHikari
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000       # 30s
+      idle-timeout: 600000            # 10m
+      max-lifetime: 1800000           # 30m (keep < PG default 8h)
+      #leak-detection-threshold: 20000 # 20s (enable if diagnosing leaks)
+      data-source-properties:
+        reWriteBatchedInserts: true   # PostgreSQL batch insert optimization
+        stringtype: unspecified       # Safer for Long/UUID/text casts
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
+    contexts: local
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 100
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        format_sql: true
+
+#  cache:
+#    type: caffeine
+#    cache-names: auditEvents
+#    caffeine:
+#      spec: maximumSize=10000,expireAfterWrite=10m
+
+  jackson:
+    time-zone: UTC
+
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+    min-response-size: 1KB
+
+security:
+  jwt:
+    issuer: https://localhost/iam-service/realms/private
+    jwkSetUri: https://localhost/iam-service/realms/private/protocol/openid-connect/certs
+    validator-policy:
+      issuer: true
+      algorithm: true
+#      typ-header: true
+#      audience: true
+#      authorized-party: true
+#      scope: true
+#      subject-format: true
+#      exp-nbf-skew: true
+#      kid: true
+#      tenant: true
+#      jti: false
+#      jti-store-method: cache
+      algorithm-policy:
+        allowed-algs: [PS256]              # Pin RSA-PSS (PS256)
+  #    header-policy:
+  #      allowed-typ-headers: [JWT]
+  #      enforce-kid-pinning: true
+  #      allowed-kids: [kid-2025-10-rotate-01, kid-2025-10-rotate-02]
+  #    claim-policy:
+  #      required-audiences: [ultra-api]
+  #      allowed-azp: [ultra-frontend, ultra-partner]
+  #      required-scopes: [read:secure, write:secure]
+  #      subject-pattern: '^[a-f0-9-]{36}$'
+  #      clock-skew: 60s
+
+
+app:
+  cache:
+    caffeine:
+      enabled: true
+      transaction-aware: true
+      caches:
+        - name: sharedShortLived
+          maximumSize: 500
+          expireAfterWrite: 30s
+        - name: sharedMediumLived
+          maximumSize: 2500
+          expireAfterWrite: 5m
+        - name: sharedLongLived
+          maximumSize: 5000
+          expireAfterWrite: 1h
+
+        - name: localShortLived
+          maximumSize: 500
+          expireAfterWrite: 30s
+        - name: localMediumLived
+          maximumSize: 2500
+          expireAfterWrite: 5m
+        - name: localLongLived
+          maximumSize: 5000
+          expireAfterWrite: 1h
+    redis:
+      enabled: true
+      transaction-aware: true
+      lettuce:
+        host: ${APP_CACHE_REDIS_HOST} # localhost
+        port: ${APP_CACHE_REDIS_PORT} # 6379
+        password: ${APP_CACHE_REDIS_PASSWORD} # test
+        ssl: ${APP_CACHE_REDIS_SENTINEL:false} # true
+        sentinel: ${APP_CACHE_REDIS_SENTINEL:false} # true
+        sentinelMaster: ${APP_CACHE_REDIS_SENTINEL_MASTER:} # myMaster
+        sentinelNodes: ${APP_CACHE_REDIS_SENTINEL_NODES:}
+  #        - redis-sentinel-1.example.com:26379 # APP_CACHE_REDIS_SENTINEL_NODES_0
+  #        - redis-sentinel-2.example.com:26379 # APP_CACHE_REDIS_SENTINEL_NODES_1
+  #        - redis-sentinel-3.example.com:26379 # APP_CACHE_REDIS_SENTINEL_NODES_2
+        command-timeout: 5s
+        connect-timeout: 2s
+        shutdown-timeout: 0s
+        pool:
+          enabled: true
+          max-total: 8
+          max-idle: 4
+          min-idle: 2
+          max-wait: 1s
+        transactions-pool:
+          enabled: true
+          max-total: 18
+          max-idle: 10
+          min-idle: 3
+          max-wait: 1s
+      defaults:
+        ttl: 30s
+        value-serializer: json  # Mandatory. Recommended to define it only at default level, unless something specifically is needed per cache.
+      caches:
+        - name: sharedShortLived
+          ttl: 1m
+          value-serializer: json # Optional at cache level.
+        - name: sharedMediumLived
+          ttl: 10m
+          value-serializer: json # Optional at cache level.
+        - name: sharedLongLived
+          ttl: 2h
+          value-serializer: json # Optional at cache level.
+
+        - name: shortLived
+          ttl: 30s
+          value-serializer: json # Optional at cache level.
+        - name: mediumLived
+          ttl: 5m
+          value-serializer: json # Optional at cache level.
+        - name: longLived
+          ttl: 1h
+          value-serializer: json # Optional at cache level.
+    two-level:
+      enabled: true
+      caches:
+        - sharedShortLived
+        - sharedMediumLived
+        - sharedLongLived
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+  observations:
+    key-values:
+      application: ${spring.application.name}
+      region: ${REGION:eu}
+      environment: ${ENVIRONMENT:prod}
+
+logging:
+  config: ${LOGGING_CONFIG_PATH:classpath:log4j2-spring.xml}
+  level:
+    root: INFO
+    org.springframework.web: INFO                 # Detailed request mapping logs
+    org.springframework.security: INFO            # See auth flow
+    org.springframework.boot.autoconfigure: INFO # See which auto-configs are applied
+    org.hibernate.SQL: INFO                       # Show SQL statements
+    org.hibernate.orm.jdbc.bind: INFO             # Show SQL params (Hibernate 6+)
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: WARN
+    com.zaxxer.hikari: INFO                        # Connection pool activity
+    org.apache.catalina: INFO                       # Embedded Tomcat startup info
+    liquibase: INFO                                # Detailed migration logs
+    liquibase.changelog: INFO                      # Show each changeset applied
+    liquibase.executor: INFO                       # Show SQL executed by Liquibase
+    org.springframework.cache: INFO                # Cache hits/misses

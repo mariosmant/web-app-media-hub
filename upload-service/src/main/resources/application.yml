@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: upload-service
+  # Use Config Data API to import from Config Server
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      # Config Server URI injected via environment variable
+      uri: ${CONFIG_SERVER_URI}
+      # Git branch/tag/commit label (defaults to main if not set)
+      label: ${CONFIG_LABEL:main}
+      # Fail fast if Config Server is unreachable (prod best practice)
+      fail-fast: true
+      discovery:
+        enabled: false
+      retry:
+        max-attempts: 6
+        initial-interval: 2000
+        multiplier: 1.6
+        max-interval: 10000
+      request-connect-timeout: 3000
+      request-read-timeout: 3000
+
+logging:
+  level:
+    org.springframework.cloud.config: INFO
+    org.springframework.web.client.RestTemplate: INFO
+    org.apache.http: INFO
+    org.apache.http.wire: INFO

@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "app.security.jwt")
+@ConfigurationProperties(prefix = "security.jwt")
 public class AppSecurityProperties {
     private String issuer;
     private String jwkSetUri;
