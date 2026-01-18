@@ -18,6 +18,7 @@ import java.util.Map;
 public class UploadController {
 
     private final FormService formService;
+    private final VideoService videoService;
 
     public UploadController(FormService formService) {
         this.formService = formService;
@@ -46,5 +47,17 @@ public class UploadController {
             @RequestPart Map<String, List<MultipartFile>> files
     ) {
         return ResponseEntity.ok().body(formService.submitFormMultipart(formSubmitRequest, files));
+    }
+
+    @PostMapping(
+            path = "/video",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> uploadVideo(
+            @Valid @RequestPart("form") UploadVideoRequest uploadVideoRequest,
+            @RequestPart Map<String, List<MultipartFile>> files
+    ) {
+        return ResponseEntity.ok().body(formService.submitFormMultipart(uploadVideoRequest, files));
     }
 }

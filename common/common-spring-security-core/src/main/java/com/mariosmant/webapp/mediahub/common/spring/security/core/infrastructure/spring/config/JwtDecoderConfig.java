@@ -39,9 +39,6 @@ public class JwtDecoderConfig {
                                                         ObjectProvider<JtiStore> jtiStoreProvider) {
         ValidatorPolicy validatorPolicy = props.getValidatorPolicy();
         List<OAuth2TokenValidator<Jwt>> validators = new ArrayList<>();
-        if(validatorPolicy == null) {
-            return new CompositeJwtValidator(validators);
-        }
 
         addValidatorIf(validatorPolicy.isIssuer(),
                 () -> JwtValidators.createDefaultWithIssuer(props.getIssuer()), validators);

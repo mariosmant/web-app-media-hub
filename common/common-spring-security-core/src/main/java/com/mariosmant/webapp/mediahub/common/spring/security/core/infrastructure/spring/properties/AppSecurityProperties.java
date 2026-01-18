@@ -13,5 +13,5 @@ public class AppSecurityProperties {
     private String issuer;
     private String jwkSetUri;
     private String authMode;
-    private ValidatorPolicy validatorPolicy;
+    private ValidatorPolicy validatorPolicy = new ValidatorPolicy();
 }

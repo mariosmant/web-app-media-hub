@@ -19,7 +19,7 @@ public class ValidatorPolicy {
     private boolean kid;
     private boolean tenant;
     private boolean jti;
-    private AlgorithmPolicy algorithmPolicy;
-    private HeaderPolicy headerPolicy;
-    private ClaimPolicy claimPolicy;
+    private AlgorithmPolicy algorithmPolicy = new AlgorithmPolicy();;
+    private HeaderPolicy headerPolicy = new HeaderPolicy();
+    private ClaimPolicy claimPolicy = new ClaimPolicy();
 }

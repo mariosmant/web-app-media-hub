@@ -1,172 +1,171 @@
-# RKE2 and Rancher Installation in WSL2
+# Music CDC Stack (Kafka KRaft + Debezium + ES/OpenSearch + Spring Boot)
 
-## Install RKE2
+Sets up:
+- Kafka (KRaft quorum: 3 controllers, 3 brokers), Connect, Schema Registry (Avro).
+- PostgreSQL managed by **Liquibase** (schema, monthly partitions, publication, per-connector signal tables).
+- Debezium CDC connectors with **distinct DLQ topics** and **per-partition signal tables** to trigger manual snapshots.
+- Elasticsearch and OpenSearch sinks with **distinct DLQs**.
+- Spring Boot (JDK 25) search API with 2 endpoints (no auth for now).
 
-```bash
-cd ~
-sudo mkdir /etc/rancher
-sudo mkdir /etc/rancher/rke2
-```
-
-Create a config.yaml
-
-```bash
-sudo nano /etc/rancher/rke2/config.yaml
-```
-
-And paste
-
-```bash
-cni: calico
-
-cni_env:
-  - name: CALICO_IPV4POOL_IPIP
-    value: "Always"
-  - name: IP_AUTODETECTION_METHOD
-    value: "cidr=192.168.1.0/24"   # pick your LAN’s CIDR so Calico ignores it
-  - name: CALICO_DISABLE_FILE_LOGGING
-    value: "true
-```
-
-Then `Ctrl+O` to save and `Ctrl+X` to close `nano`.
-
-Continue to install RKE2 as server.
-
-```bash
-curl -sfL https://get.rke2.io | sudo INSTALL_RKE2_TYPE=server sh -
-
-sudo systemctl enable rke2-server
-
-sudo systemctl start rke2-server
-```
-
-## Install Kubectl
-
-```bash
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-```
-
-The following should output `OK`
-
-```bash
-echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-```
-
-Continue installation.
-
-```bash
-chmod +x kubectl
-
-mkdir -p ~/.local/bin
-mv ./kubectl ~/.local/bin/kubectl
-
-mkdir -p ~/.kube
-sudo cp /etc/rancher/rke2/rke2.yaml ~/.kube/config
-sudo chown $(id -u):$(id -g) ~/.kube/config
-chmod 600 ~/.kube/config
-
-rm ~/kubectl.sha256
-
-nano ~/.bashrc
-```
-
-Add the following lines at the bottom of the file
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-
-export KUBECONFIG=$HOME/.kube/config
-```
-
-Type `Ctrl+O` to save and then `Ctrl+X` to close `nano`.
-
-## Install Helm
-
-```bash
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-
-sudo apt-get install apt-transport-https --yes
-
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-
-sudo apt-get update
-
-sudo apt-get install helm
-```
-
-## Install jq
-
-```bash
-sudo apt install jq
-```
-
-## Install cert-manager.crds and cert-manager
-
-```bash
-kubectl create namespace cert-manager
-
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.18.2/cert-manager.crds.yaml
+![Infrastructure & Deployment Architecture Diagram](docs/infrastructure_and_deployment_architecture_diagram.png)
 
 
-helm repo add jetstack https://charts.jetstack.io
+## Why Liquibase here?
+- Best practice for production: migrations are versioned and automated via CI/CD. The API is only a query layer; indexing is done by Kafka Connect sinks, so Liquibase runs as a separate migrator service (not inside the query API) to keep responsibilities clean. This mirrors large-scale setups where data pipelines and application services are decoupled.
 
-helm repo update
-
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --version v1.18.2 --set installCRDs=false --wait
-```
-
-## Install Rancher
-
-```bash
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
-
-helm repo update
-
-kubectl create namespace cattle-system
-
-helm install rancher rancher-latest/rancher --namespace cattle-system --set hostname=rancher.local --set replicas=1
-```
-
-## Keycloak (local)
-
+## Prerequisites
+- Docker and Docker Compose.
+- Java 25 + Maven (to build the custom SMT, optional).
+- Create apicurio DB, open it in pgAdmin, and then create the user using the following:
 ```sql
--- Connect to PostgreSQL as the postgres superuser
-psql -U postgres
+CREATE DATABASE apicurio
+  WITH ENCODING 'UTF8'
+       LC_COLLATE = 'en_US.utf8'
+       LC_CTYPE   = 'en_US.utf8'
+       TEMPLATE template0;
 
--- 1. Create the database
-CREATE DATABASE keycloak_db;
+CREATE USER apicurio WITH PASSWORD 'secret';
 
--- 2. Create the user with a strong password
+GRANT ALL PRIVILEGES ON DATABASE apicurio TO apicurio;
+
+\c apicurio;
+
+GRANT USAGE ON SCHEMA public TO apicurio;
+GRANT CREATE ON SCHEMA public TO apicurio;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON TABLES TO apicurio;
+
+```
+- Create airflow DB, open it in pgAdmin, and then create the user using the following:
+```sql
+CREATE DATABASE airflow
+  WITH ENCODING 'UTF8'
+       LC_COLLATE = 'en_US.utf8'
+       LC_CTYPE   = 'en_US.utf8'
+       TEMPLATE template0;
+
+CREATE USER airflow WITH PASSWORD 'airflow';
+
+GRANT ALL PRIVILEGES ON DATABASE airflow TO airflow;
+
+\c airflow;
+
+GRANT USAGE ON SCHEMA public TO airflow;
+GRANT CREATE ON SCHEMA public TO airflow;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON TABLES TO airflow;
+
+```
+- Create keycloak DB, open it in pgAdmin, and then create the user using the following:
+```sql
+
+
 CREATE USER keycloak_user WITH PASSWORD 'StrongP@ssw0rd';
 
--- 3. Grant all privileges on the database to the user
-GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO keycloak_user;
 
--- 4. (Optional) Ensure the user can manage schema objects
-\c keycloak_db
-GRANT ALL PRIVILEGES ON SCHEMA public TO keycloak_user;
+CREATE DATABASE keycloak
+  WITH OWNER = keycloak_user
+       ENCODING 'UTF8'
+       LC_COLLATE = 'en_US.utf8'
+       LC_CTYPE   = 'en_US.utf8'
+       TEMPLATE template0;
+       
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak_user;
+
+
 ```
+- Generate certs in `kafka/certs` folder, via `cert-generator/docker-compose.yml`. See `README.md` from `cert-generator` for more details.
 
+## Build custom SMT (optional)
+```bash
+cd plugins/custom-smt
+mvn -q -DskipTests package
+cd ../..
+Ensure plugins/custom-smt/target/custom-smt-0.1.0.jar exists (mounted to Connect).
+Start the stack
+docker compose up -d
+Liquibase will apply DB migrations before Kafka Connect starts.
+Create connectors
+# Debezium CDC
 
-## Admin DB (local)
-```sql
--- Connect to PostgreSQL as the postgres superuser
-psql -U postgres
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/debezium-tracks-2025-12.json
 
--- 1. Create the database
-CREATE DATABASE admin_db;
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/debezium-tracks-2026-01.json
 
--- 2. Create the user with a strong password
-CREATE USER mediahub_admin WITH PASSWORD 'StrongP@ssw0rd';
+# Elasticsearch sinks
 
--- 3. Grant all privileges on the database to the user
-GRANT ALL PRIVILEGES ON DATABASE admin_db TO mediahub_admin;
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/es-sink-2025-12.json
 
--- 4. Switch to the new database
-\c admin_db
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/es-sink-2026-01.json
 
--- 5. Grant privileges on the public schema
-GRANT ALL PRIVILEGES ON SCHEMA public TO mediahub_admin;
-```
+# OpenSearch sinks
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/opensearch-sink-2025-12.json
+
+curl -s -X POST http://localhost:8083/connectors -H "Content-Type: application/json" \
+  --data @connect-configs/opensearch-sink-2026-01.json
+Create indices (optional mapping)
+Elasticsearch:
+curl -X PUT "http://localhost:9200/tracks" -H 'Content-Type: application/json' -d '{
+  "settings": { "index": { "number_of_shards": 1, "number_of_replicas": 0 } },
+  "mappings": { "properties": {
+    "track_id": { "type": "long" },
+    "title":    { "type": "text" },
+    "artist":   { "type": "text" },
+    "album":    { "type": "text" },
+    "duration_ms": { "type": "integer" },
+    "recorded_at": { "type": "date", "format": "date_time" }
+  } }
+}'
+OpenSearch:
+curl -X PUT "http://localhost:9201/tracks" -H 'Content-Type: application/json' -d '{
+  "settings": { "index": { "number_of_shards": 1, "number_of_replicas": 0 } },
+  "mappings": { "properties": {
+    "track_id": { "type": "long" },
+    "title":    { "type": "text" },
+    "artist":   { "type": "text" },
+    "album":    { "type": "text" },
+    "duration_ms": { "type": "integer" },
+    "recorded_at": { "type": "date", "format": "date_time" }
+  } }
+}'
+Search API
+•	Elasticsearch: GET http://localhost:8080/search/es?q=Artist
+•	OpenSearch: GET http://localhost:8080/search/opensearch?q=Song
+Trigger manual re-index via Debezium signal tables
+Partition 2025_12 snapshot:
+docker exec -it postgres psql -U appuser -d musicdb -c \
+"INSERT INTO public.debezium_signal_tracks_2025_12 (id, type, data)
+ VALUES ('sig-2025-12-001', 'execute-snapshot',
+ '{\"data-collections\": [\"public.tracks_2025_12\"], \"type\":\"INCREMENTAL\"}');"
+Partition 2026_01 snapshot:
+docker exec -it postgres psql -U appuser -d musicdb -c \
+"INSERT INTO public.debezium_signal_tracks_2026_01 (id, type, data)
+ VALUES ('sig-2026-01-001', 'execute-snapshot',
+ '{\"data-collections\": [\"public.tracks_2026_01\"], \"type\":\"INCREMENTAL\"}');"
+Distinct DLQs per connector
+•	Debezium CDC: _dlq_pg_2025_12, _dlq_pg_2026_01
+•	ES sinks: _dlq_es_2025_12, _dlq_es_2026_01
+•	OpenSearch sinks: _dlq_os_2025_12, _dlq_os_2026_01
+Production notes
+•	Enable TLS, SASL/SCRAM, ACLs for Kafka, Connect REST, Schema Registry, and PostgreSQL.
+•	Manage secrets outside compose (vaults), use least privilege in publications and connectors.
+•	Govern Avro schemas with compatibility rules; review schema changes.
+•	Monitor DLQ growth, connector task failures, Kafka ISR, and Postgres slot lag.
+
+---
+
+# Liquibase vs Spring Boot for migrations
+
+- **Best practice:** Keep schema lifecycle independent of the query API. Use Liquibase as a separate migrator (as in this compose) or via CI/CD pipelines. This aligns with large-scale setups where CDC, indexing, and query services are decoupled.
+- **When to put Liquibase in Spring Boot:** If the API owns the schema and needs to evolve it alongside code. Here, the API only queries indexed data; schema pertains to ingestion and CDC. Keeping Liquibase separate avoids coupling release cycles and reduces risk.
+- **Operational flow:** Apply Liquibase migrations before starting or altering any Debezium connectors. This ensures new partitions and signal tables exist before CDC tasks run.
+
+If you prefer Liquibase inside Spring Boot, I can add the dependency and a changelog to the API module.
+

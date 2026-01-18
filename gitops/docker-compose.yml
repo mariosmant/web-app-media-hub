@@ -1,0 +1,620 @@
+services:
+  # --- Kafka KRaft controllers ---
+  kafka-controller-1:
+    image: apache/kafka:4.1.1
+    container_name: kafka-controller-1
+    command: |
+      bash -c "  
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka
+    volumes:
+      - ./kafka/kraft/controller-1.properties:/etc/kafka/controller.properties
+      - kafka-controller-1-data:/var/lib/kafka
+      - ./kafka/generated/certs/controller-1/kafka-controller-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [appnet]
+
+  kafka-controller-2:
+    image: apache/kafka:4.1.1
+    container_name: kafka-controller-2
+    command: |
+      bash -c "
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka
+    volumes:
+      - ./kafka/kraft/controller-2.properties:/etc/kafka/controller.properties
+      - kafka-controller-2-data:/var/lib/kafka
+      - ./kafka/generated/certs/controller-2/kafka-controller-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [appnet]
+
+  kafka-controller-3:
+    image: apache/kafka:4.1.1
+    container_name: kafka-controller-3
+    command: |
+      bash -c "
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka
+    volumes:
+      - ./kafka/kraft/controller-3.properties:/etc/kafka/controller.properties
+      - kafka-controller-3-data:/var/lib/kafka
+      - ./kafka/generated/certs/controller-3/kafka-controller-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [appnet]
+
+  # --- Kafka KRaft brokers ---
+  kafka-broker-1:
+    image: apache/kafka:4.1.1
+    container_name: kafka-broker-1
+    depends_on: [kafka-controller-1, kafka-controller-2, kafka-controller-3]
+    ports:
+      - "19092:19092"
+    command: |
+      bash -c "
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - ./kafka/kraft/broker-1.properties:/etc/kafka/server.properties
+      - kafka-broker-1-data:/var/lib/kafka
+      - ./kafka/generated/certs/broker-1/kafka-broker-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [appnet]
+
+  kafka-broker-2:
+    image: apache/kafka:4.1.1
+    container_name: kafka-broker-2
+    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
+    ports:
+      - "19093:19092"
+    command: |
+      bash -c "
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - ./kafka/kraft/broker-2.properties:/etc/kafka/server.properties
+      - kafka-broker-2-data:/var/lib/kafka
+      - ./kafka/generated/certs/broker-2/kafka-broker-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [ appnet ]
+
+  kafka-broker-3:
+    image: apache/kafka:4.1.1
+    container_name: kafka-broker-3
+    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
+    ports:
+      - "19094:19092"
+    command: |
+      bash -c "
+      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+      "
+    environment:
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - ./kafka/kraft/broker-3.properties:/etc/kafka/server.properties
+      - kafka-broker-3-data:/var/lib/kafka
+      - ./kafka/generated/certs/broker-3/kafka-broker-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+    networks: [ appnet ]
+
+  # --- Schema Registry (Avro) ---
+  kafka-confl-schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.1
+    container_name: kafka-confl-schema-registry
+    depends_on: [kafka-broker-1, kafka-broker-2, kafka-broker-3]
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: kafka-confl-schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SSL://kafka-broker-1:9092,SSL://kafka-broker-2:9092,SSL://kafka-broker-3:9092
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SSL
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/schema-registry/secrets/keystore.p12
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/schema-registry/secrets/truststore.p12
+      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
+
+      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: BACKWARD
+    volumes:
+      - ./kafka/generated/certs/confl-schema-registry/kafka-confl-schema-registry-keystore.p12:/etc/schema-registry/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/schema-registry/secrets/truststore.p12:ro
+    ports:
+      - "9081:8081"
+    networks: [appnet]
+
+  ##############################
+  # Apicurio Registry (Avro)   #
+  ##############################
+  apicurio-registry:
+    image: apicurio/apicurio-registry:latest-release
+    container_name: apicurio-registry
+    ports:
+      - "9082:8080"    # Apicurio runs on 8080 internally
+    environment:
+      - QUARKUS_HTTP_PORT=8080
+      - APICURIO_STORAGE_KIND=sql
+      - APICURIO_STORAGE_SQL_KIND=postgresql
+      - APICURIO_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/apicurio
+      - APICURIO_DATASOURCE_USERNAME=apicurio
+      - APICURIO_DATASOURCE_PASSWORD=secret
+    networks: [ appnet ]
+
+  # --- Kafka Connect (Debezium + sinks) ---
+  kafka-connect:
+    image: quay.io/debezium/connect:2.7
+    container_name: kafka-connect
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - apicurio-registry
+
+    environment:
+      # ------------------------------------------------------------
+      # Kafka Connect worker SSL configuration (correct prefixes)
+      # ------------------------------------------------------------
+      BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+
+      CONNECT_SECURITY_PROTOCOL: SSL
+      CONNECT_SSL_KEYSTORE_LOCATION: /etc/kafka-connect/secrets/keystore.p12
+      CONNECT_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
+      CONNECT_SSL_KEY_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
+      CONNECT_SSL_KEYSTORE_TYPE: PKCS12
+
+      CONNECT_SSL_TRUSTSTORE_LOCATION: /etc/kafka-connect/secrets/truststore.p12
+      CONNECT_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
+      CONNECT_SSL_TRUSTSTORE_TYPE: PKCS12
+
+      # Enable hostname verification (your certs are correct)
+      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+
+      # ------------------------------------------------------------
+      # Internal Kafka Connect topics
+      # ------------------------------------------------------------
+      GROUP_ID: connect-cluster
+      CONFIG_STORAGE_TOPIC: _connect-configs
+      OFFSET_STORAGE_TOPIC: _connect-offsets
+      STATUS_STORAGE_TOPIC: _connect-status
+
+      CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      STATUS_STORAGE_REPLICATION_FACTOR: 3
+
+      # ------------------------------------------------------------
+      # Apicurio converters
+      # ------------------------------------------------------------
+      ENABLE_APICURIO_CONVERTERS: "true"
+
+      KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+      VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+
+      KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+      VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+
+      KEY_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
+      VALUE_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
+
+      KEY_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
+      VALUE_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
+
+      # ------------------------------------------------------------
+      # REST API
+      # ------------------------------------------------------------
+      REST_ADVERTISED_HOST_NAME: kafka-connect
+      REST_PORT: 8083
+
+      # ------------------------------------------------------------
+      # Plugins
+      # ------------------------------------------------------------
+      PLUGIN_PATH: /kafka/connect/plugins
+      ERRORS_LOG_ENABLE: "true"
+    volumes:
+      - ./kafka/generated/connect/plugins:/kafka/connect/plugins
+      - ./kafka/generated/certs/connect/kafka-connect-keystore.p12:/etc/kafka-connect/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-connect/secrets/truststore.p12:ro
+    ports:
+      - "9083:8083"
+    networks:
+      - appnet
+
+  # --- Elasticsearch (community single-node) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    networks: [appnet]
+
+  # --- OpenSearch (single-node) + Dashboards ---
+  opensearch:
+    image: opensearchproject/opensearch:2.14.0
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=MyStrongPass123!
+    ports:
+      - "9201:9200"
+    networks: [appnet]
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.14.0
+    container_name: opensearch-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+    ports:
+      - "5601:5601"
+    depends_on: [opensearch]
+    networks: [appnet]
+
+  # ============================
+  # MinIO (S3-compatible storage)
+  # ============================
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data1 /data2 /data3 /data4 --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - ./minio/data1:/data1
+      - ./minio/data2:/data2
+      - ./minio/data3:/data3
+      - ./minio/data4:/data4
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+    networks: [appnet]
+
+  # ============================
+  # Iceberg REST Catalog
+  # ============================
+  iceberg-rest:
+    image: tabulario/iceberg-rest:latest
+    container_name: iceberg-rest
+    environment:
+      CATALOG_WAREHOUSE: s3a://lakehouse/
+      CATALOG_S3_ENDPOINT: http://minio:9000
+      CATALOG_S3_ACCESS_KEY_ID: minioadmin
+      CATALOG_S3_SECRET_ACCESS_KEY: minioadmin123
+      CATALOG_S3_PATH_STYLE_ACCESS: "true"
+    ports:
+      - "8181:8181"
+    depends_on:
+      - minio
+    restart: unless-stopped
+    networks: [appnet]
+
+  # ============================
+  # Spark Master
+  # ============================
+  spark-master:
+    image: apache/spark:4.1.1
+    container_name: spark-master
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      --host spark-master --port 7077 --webui-port 8088
+    environment:
+      SPARK_NO_DAEMONIZE: "true"
+    ports:
+      - "7077:7077"
+      - "8088:8088"
+    volumes:
+      - spark-conf:/opt/spark/conf
+      - spark-jars:/opt/spark/jars
+      - spark-history:/opt/spark/history
+    restart: unless-stopped
+    networks: [appnet]
+
+  # ============================
+  # Spark Worker
+  # ============================
+  spark-worker-1:
+    image: apache/spark:4.1.1
+    container_name: spark-worker-1
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://spark-master:7077
+    environment:
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 4G
+      SPARK_NO_DAEMONIZE: "true"
+    depends_on:
+      - spark-master
+    volumes:
+      - spark-conf:/opt/spark/conf
+      - spark-jars:/opt/spark/jars
+      - spark-history:/opt/spark/history
+    restart: unless-stopped
+    networks: [appnet]
+
+  # ============================
+  # Spark History Server
+  # ============================
+  spark-history:
+    image: apache/spark:4.1.1
+    container_name: spark-history
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
+    environment:
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/history"
+      SPARK_NO_DAEMONIZE: "true"
+    ports:
+      - "18080:18080"
+    volumes:
+      - spark-history:/opt/spark/history
+    restart: unless-stopped
+    networks: [appnet]
+
+  flink-jobmanager:
+    image: apache/flink:2.2
+    container_name: flink-jobmanager
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+        state.backend: rocksdb
+        state.checkpoints.dir: file:///flink-checkpoints
+        state.savepoints.dir: file:///flink-savepoints
+    ports:
+      - "9084:8081"   # Flink UI
+    volumes:
+      - flink-checkpoints:/flink-checkpoints
+      - flink-savepoints:/flink-savepoints
+    depends_on:
+      - kafka-broker-1
+      - minio
+    networks:
+      - appnet
+
+  flink-taskmanager-1:
+    image: apache/flink:2.2
+    container_name: flink-taskmanager-1
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    depends_on:
+      - flink-jobmanager
+    volumes:
+      - flink-checkpoints:/flink-checkpoints
+      - flink-savepoints:/flink-savepoints
+    networks:
+      - appnet
+
+  flink-taskmanager-2:
+    image: apache/flink:2.2
+    container_name: flink-taskmanager-2
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    depends_on:
+      - flink-jobmanager
+    volumes:
+      - flink-checkpoints:/flink-checkpoints
+      - flink-savepoints:/flink-savepoints
+    networks:
+      - appnet
+
+  airflow-redis:
+    image: redis:8.4.0
+    container_name: airflow-redis
+    command: [ "redis-server", "--appendonly", "yes" ]
+    networks:
+      - appnet
+
+  airflow-scheduler:
+    image: apache/airflow:3.1.6
+    container_name: airflow-scheduler
+    command: scheduler
+#    command: >
+#      bash -c "
+#        airflow standalone
+#      "
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CELERY__BROKER_URL: redis://airflow-redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@host.docker.internal:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@host.docker.internal:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      - airflow-redis
+    networks:
+      - appnet
+
+  airflow-api:
+    image: apache/airflow:3.1.6
+    container_name: airflow-api
+    command: api-server
+    ports:
+      - "9085:8080"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CELERY__BROKER_URL: redis://airflow-redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@host.docker.internal:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@host.docker.internal:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      - airflow-scheduler
+    networks:
+      - appnet
+
+  airflow-worker:
+    image: apache/airflow:3.1.6
+    container_name: airflow-worker
+    command: celery worker
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CELERY__BROKER_URL: redis://airflow-redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@host.docker.internal:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@host.docker.internal:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      - airflow-scheduler
+    networks:
+      - appnet
+
+  airflow-triggerer:
+    image: apache/airflow:3.1.6
+    container_name: airflow-triggerer
+    command: triggerer
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CELERY__BROKER_URL: redis://airflow-redis:6379/0
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@host.docker.internal:5432/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@host.docker.internal:5432/airflow
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/plugins:/opt/airflow/plugins
+    depends_on:
+      - airflow-scheduler
+    networks:
+      - appnet
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_proxy
+    restart: always
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      # Your custom nginx.conf
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+
+      # TLS certificates
+      - ./nginx/conf/certs/server.crt:/etc/nginx/certs/server.crt:ro
+      - ./nginx/conf/certs/server.key:/etc/nginx/certs/server.key:ro
+
+      # Optional: static site or upstream configs
+      # - ./html:/usr/share/nginx/html:ro
+      # - ./conf.d:/etc/nginx/conf.d:ro
+
+      # Logs (optional but useful)
+      - ./logs:/var/log/nginx
+
+    # Optional: healthcheck for production
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - appnet
+
+  keycloak:
+    build:
+      context: ./keycloak
+      dockerfile: Dockerfile
+      args:
+        KC_HTTP_RELATIVE_PATH: /iam-service
+        KC_HTTPS_ENABLED: "true"
+        KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
+        KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
+        KC_HTTP_ENABLED: "false"
+        KC_HOSTNAME_STRICT: "true"
+        #KC_HOSTNAME_STRICT_HTTPS: "true"
+        KC_DB: postgres
+    container_name: keycloak
+    restart: always
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+      KC_DB: postgres
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/keycloak
+
+      KC_HOSTNAME: localhost
+      #KC_HOSTNAME_STRICT: "true"
+      #KC_HOSTNAME_STRICT_HTTPS: "true"
+      KC_PROXY_HEADERS: forwarded
+
+      #KC_HTTPS_ENABLED: "true"
+      #KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
+      #KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
+      #KC_HTTP_ENABLED: "false"
+
+      KC_FRONTEND_URL: https://localhost/iam-service/
+      KC_HTTP_RELATIVE_PATH: /iam-service
+
+    ports:
+      - "8443:8443"
+    volumes:
+      # Keycloak config
+      - ./keycloak/conf/keycloak.conf:/opt/keycloak/conf/keycloak.conf:ro
+      # Certificates (if Keycloak handles HTTPS)
+      - ./keycloak/generated/certs/keycloak/keycloak.crt:/opt/keycloak/conf/keycloak.crt:ro
+      - ./keycloak/generated/certs/keycloak/keycloak.key:/opt/keycloak/conf/keycloak.key:ro
+      # Custom providers (JARs)
+      - ./keycloak/providers:/opt/keycloak/providers
+      # Custom themes
+      - ./keycloak/themes:/opt/keycloak/themes
+    networks:
+      - appnet
+
+  # --- Spring Boot search API (JDK 25) ---
+  catalog-service:
+    build:
+      context: ../catalog-service
+      dockerfile: Dockerfile
+    container_name: catalog-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on: [elasticsearch, opensearch]
+    ports:
+      - "8080:8080"
+    networks: [appnet]
+
+networks:
+  appnet: {}
+
+volumes:
+  kafka-controller-1-data: {}
+  kafka-controller-2-data: {}
+  kafka-controller-3-data: {}
+  kafka-broker-1-data: {}
+  kafka-broker-2-data: {}
+  kafka-broker-3-data: {}
+  spark-conf: {}
+  spark-jars: {}
+  spark-history: {}
+  flink-checkpoints: {}
+  flink-savepoints: {}
