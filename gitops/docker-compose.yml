@@ -274,6 +274,71 @@ services:
     networks:
       - appnet
 
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    depends_on:
+      - kafka-broker-1
+      - kafka-broker-2
+      - kafka-broker-3
+      - kafka-confl-schema-registry
+    ports:
+      - "9050:9000"   # expose only if you want UI from host
+    environment:
+      # ------------------------------------------------------------
+      # Kafka cluster connection (internal SSL listeners)
+      # ------------------------------------------------------------
+      KAFKA_BROKERCONNECT: "kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092"
+      SERVER_PORT: 9000
+      SERVER_SERVLET_CONTEXTPATH: "/"
+
+      # ------------------------------------------------------------
+      # Schema Registry integration (Confluent)
+      # ------------------------------------------------------------
+      SCHEMAREGISTRY_CONNECT: "http://kafka-confl-schema-registry:8081"
+
+      KAFKA_PROPERTIES_FILE: /kafdrop/kafka.properties
+      KAFKA_TRUSTSTORE_FILE: /etc/kafdrop/secrets/truststore.p12
+      KAFKA_KEYSTORE_FILE: /etc/kafdrop/secrets/keystore.p12
+
+      # ------------------------------------------------------------
+      # JVM tuning (optional)
+      # ------------------------------------------------------------
+      JVM_OPTS: "-Xms512M -Xmx2G"
+
+    volumes:
+      - ./kafka/kafdrop/kafka.properties:/kafdrop/kafka.properties:ro
+      - ./kafka/generated/certs/kafdrop/kafdrop-keystore.p12:/etc/kafdrop/secrets/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafdrop/secrets/truststore.p12:ro
+
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "9180:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kraft-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+
+      # SSL / mTLS
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /etc/kafka-ui/truststore.p12
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: truststore-pass_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_LOCATION: /etc/kafka-ui/keystore.p12
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEY_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+
+    volumes:
+      - ./kafka/generated/certs/kafka-ui/kafka-ui-keystore.p12:/etc/kafka-ui/keystore.p12:ro
+      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-ui/truststore.p12:ro
+    networks:
+      - appnet
+
+
   # --- Elasticsearch (community single-node) ---
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -292,22 +357,67 @@ services:
     container_name: opensearch
     environment:
       - discovery.type=single-node
-      - plugins.security.disabled=true
-      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=MyStrongPass123!
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+
+      # Security ON
+      - plugins.security.disabled=false
+
+      # Admin password
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
+
+      # === HTTP (REST) TLS ===
+      - plugins.security.ssl.http.enabled=true
+      - plugins.security.ssl.http.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.crt
+      - plugins.security.ssl.http.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.key
+      - plugins.security.ssl.http.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
+
+      # === Transport (cluster) TLS ===
+      - plugins.security.ssl.transport.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.crt
+      - plugins.security.ssl.transport.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.key
+      - plugins.security.ssl.transport.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
+      - plugins.security.ssl.transport.enforce_hostname_verification=true
+      - plugins.security.ssl.transport.resolve_hostname=true
+
+      # Optional: strict security config
+      - plugins.security.allow_default_init_securityindex=true # Should be false for prod.
+      - plugins.security.audit.type=internal_opensearch
+
+    volumes:
+      - ./opensearch/generated/certs/ca:/usr/share/opensearch/config/certs/ca:ro
+      - ./opensearch/generated/certs/opensearch:/usr/share/opensearch/config/certs/opensearch:ro
+      - opensearch-data:/usr/share/opensearch/data
+
     ports:
       - "9201:9200"
-    networks: [appnet]
+    networks: [ appnet ]
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.14.0
     container_name: opensearch-dashboards
     environment:
-      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      # Connect to OpenSearch over HTTPS
+      - OPENSEARCH_HOSTS=["https://opensearch:9200"]
+
+      # Security ON
+      - OPENSEARCH_SECURITY_ENABLED=true
+
+      # Trust OpenSearch's CA
+      - OPENSEARCH_SSL_VERIFICATIONMODE=certificate
+      - OPENSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/opensearch-dashboards/config/certs/ca/root-os-ca.crt
+
+      # Optional: enable HTTPS for Dashboards itself
+      - SERVER_SSL_ENABLED=true
+      - SERVER_SSL_CERTIFICATE=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.crt
+      - SERVER_SSL_KEY=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.key
+
+    volumes:
+      - ./opensearch/generated/certs/ca:/usr/share/opensearch-dashboards/config/certs/ca:ro
+      - ./opensearch/generated/certs/opensearch-dashboards:/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards:ro
+
     ports:
       - "5601:5601"
-    depends_on: [opensearch]
-    networks: [appnet]
+    depends_on: [ opensearch ]
+    networks: [ appnet ]
 
   # ============================
   # MinIO (S3-compatible storage)
@@ -320,10 +430,10 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin123
     volumes:
-      - ./minio/data1:/data1
-      - ./minio/data2:/data2
-      - ./minio/data3:/data3
-      - ./minio/data4:/data4
+      - minio-data1:/data1
+      - minio-data2:/data2
+      - minio-data3:/data3
+      - minio-data4:/data4
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -361,8 +471,8 @@ services:
     environment:
       SPARK_NO_DAEMONIZE: "true"
     ports:
-      - "7077:7077"
-      - "8088:8088"
+      #- "7077:7077"
+      - "9088:8088"
     volumes:
       - spark-conf:/opt/spark/conf
       - spark-jars:/opt/spark/jars
@@ -672,7 +782,7 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
-      _PIP_ADDITIONAL_REQUIREMENTS: ''
+      #_PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
     networks:
       - appnet
@@ -704,6 +814,9 @@ services:
     command: celery flower
     profiles:
       - flower
+#    environment:
+#      CELERY_BROKER_URL: redis://airflow-redis:6379/0
+
     ports:
       - "9555:5555"
     healthcheck:
@@ -742,7 +855,7 @@ services:
       # - ./conf.d:/etc/nginx/conf.d:ro
 
       # Logs (optional but useful)
-      - ./logs:/var/log/nginx
+      - ./nginx/logs:/var/log/nginx
 
     # Optional: healthcheck for production
     healthcheck:
@@ -833,3 +946,8 @@ volumes:
   spark-history: {}
   flink-checkpoints: {}
   flink-savepoints: {}
+  opensearch-data: {}
+  minio-data1: {}
+  minio-data2: {}
+  minio-data3: {}
+  minio-data4: {}

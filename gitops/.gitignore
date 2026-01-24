@@ -43,7 +43,8 @@ build/
 ### Mac OS ###
 .DS_Store
 
-
+/keycloak/generated/certs/**
+!/keycloak/generated/certs/.gitkeep
 /kafka/generated/certs/**
 !/kafka/generated/certs/.gitkeep
 /kafka/generated/connect/plugins/**
@@ -58,3 +59,9 @@ build/
 !/airflow/config/.gitkeep
 /airflow/logs/**
 !/airflow/logs/.gitkeep
+/opensearch/generated/certs/**
+!/opensearch/generated/certs/.gitkeep
+/nginx/conf/certs/**
+!/nginx/conf/certs/.gitkeep
+/nginx/logs/**
+!/nginx/logs/.gitkeep

@@ -1,7 +1,7 @@
 services:
   cert-generator-kafka:
     image: alpine:3.20
-    container_name: kafka-cert-generator
+    container_name: cert-generator-kafka
     command: ["/bin/sh", "-c", "/scripts/generate-kafka-certs.sh"]
     volumes:
       - ../kafka/generated/certs:/certs
@@ -20,11 +20,13 @@ services:
       KAFKA_BROKER_3_KEYSTORE_PASSWORD:
       KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD:
       KAFKA_CONNECT_KEYSTORE_PASSWORD:
+      KAFDROP_CONNECT_KEYSTORE_PASSWORD:
+      KAFKA_UI_CONNECT_KEYSTORE_PASSWORD:
       TRUSTSTORE_PASSWORD:
     # Run manually: docker compose run --rm cert-generator-kafka
   cert-generator-keycloak:
     image: alpine:3.20
-    container_name: kafka-cert-keycloak
+    container_name: cert-generator-keycloak
     command: [ "/bin/sh", "-c", "/scripts/generate-keycloak-certs.sh" ]
     volumes:
       - ../keycloak/generated/certs:/certs
@@ -37,3 +39,18 @@ services:
       LOCALITY: "Test"
       TRUSTSTORE_PASSWORD:
     # Run manually: docker compose run --rm cert-generator-keycloak
+  cert-generator-opensearch:
+    image: alpine:3.20
+    container_name: cert-generator-opensearch
+    command: [ "/bin/sh", "-c", "/scripts/generate-opensearch-certs.sh" ]
+    volumes:
+      - ../opensearch/generated/certs:/certs
+      - ./scripts/generate-opensearch-certs.sh:/scripts/generate-opensearch-certs.sh:ro
+    environment:
+      CA_CN: "MyOrg Root CA"
+      ORG_NAME: "MyOrg"
+      COUNTRY: "EU"
+      STATE: "Test"
+      LOCALITY: "Test"
+      TRUSTSTORE_PASSWORD:
+    # Run manually: docker compose run --rm cert-generator-opensearch
