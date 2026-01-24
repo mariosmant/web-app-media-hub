@@ -54,3 +54,7 @@ build/
 !/airflow/dags/.gitkeep
 /airflow/plugins/**
 !/airflow/plugins/.gitkeep
+/airflow/config/**
+!/airflow/config/.gitkeep
+/airflow/logs/**
+!/airflow/logs/.gitkeep
