@@ -54,3 +54,37 @@ services:
       LOCALITY: "Test"
       TRUSTSTORE_PASSWORD:
     # Run manually: docker compose run --rm cert-generator-opensearch
+  cert-generator-elasticsearch:
+    image: alpine:3.20
+    container_name: cert-generator-elasticsearch
+    command: [ "/bin/sh", "-c", "/scripts/generate-es-certs.sh" ]
+    volumes:
+      - ../elasticsearch/generated/certs:/certs
+      - ./scripts/generate-es-certs.sh:/scripts/generate-es-certs.sh:ro
+    environment:
+      CA_CN: "MyOrg Root CA"
+      ORG_NAME: "MyOrg"
+      COUNTRY: "EU"
+      STATE: "Test"
+      LOCALITY: "Test"
+      TRUSTSTORE_PASSWORD:
+      ES01_KEYSTORE_PASSWORD:
+      ES02_KEYSTORE_PASSWORD:
+      ES03_KEYSTORE_PASSWORD:
+    # Run manually: docker compose run --rm cert-generator-elasticsearch
+  cert-generator-nginx:
+    image: alpine:3.20
+    container_name: cert-generator-nginx
+    command: [ "/bin/sh", "-c", "/scripts/generate-nginx-certs.sh" ]
+    volumes:
+      - ../nginx/generated/certs:/certs
+      - ./scripts/generate-nginx-certs.sh:/scripts/generate-nginx-certs.sh:ro
+    environment:
+      CA_CN: "MyOrg Root CA"
+      ORG_NAME: "MyOrg"
+      COUNTRY: "EU"
+      STATE: "Test"
+      LOCALITY: "Test"
+      TRUSTSTORE_PASSWORD:
+      NGINX_KEYSTORE_PASSWORD:
+    # Run manually: docker compose run --rm cert-generator-nginx

@@ -338,17 +338,115 @@ services:
     networks:
       - appnet
 
-
-  # --- Elasticsearch (community single-node) ---
-  elasticsearch:
+  # ElasticSearch nodes
+  es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: elasticsearch
+    container_name: es01
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - node.name=es01
+      - cluster.name=prod-es-cluster
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es02,es03
+      - node.roles=master,data
+      - xpack.security.enabled=true
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/es01/es01.p12
+      - xpack.security.transport.ssl.keystore.password=${ES01_KEYSTORE_PASSWORD}
+      - xpack.security.transport.ssl.truststore.path=certs/es01/es01.p12
+      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata01:/usr/share/elasticsearch/data
+      - ./elasticsearch/generated/certs/es01:/usr/share/elasticsearch/config/certs/es01:ro
+      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+    networks: [appnet]
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=prod-es-cluster
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es01,es03
+      - node.roles=master,data
+      - xpack.security.enabled=true
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/es02/es02.p12
+      - xpack.security.transport.ssl.keystore.password=${ES02_KEYSTORE_PASSWORD}
+      - xpack.security.transport.ssl.truststore.path=certs/es02/es02.p12
+      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata02:/usr/share/elasticsearch/data
+      - ./elasticsearch/generated/certs/es02:/usr/share/elasticsearch/config/certs/es02:ro
+      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+    networks: [appnet]
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=prod-es-cluster
+      - cluster.initial_master_nodes=es01,es02,es03
+      - discovery.seed_hosts=es01,es02
+      - node.roles=master,data
+      - xpack.security.enabled=true
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/es03/es03.p12
+      - xpack.security.transport.ssl.keystore.password=${ES03_KEYSTORE_PASSWORD}
+      - xpack.security.transport.ssl.truststore.path=certs/es03/es03.p12
+      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata03:/usr/share/elasticsearch/data
+      - ./elasticsearch/generated/certs/es03:/usr/share/elasticsearch/config/certs/es03:ro
+      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+    networks: [appnet]
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    depends_on:
+      - es01
+      - es02
+      - es03
+    environment:
+      - ELASTICSEARCH_HOSTS=["http://es01:9200","http://es02:9200","http://es03:9200"]
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+      - SERVER_PUBLICBASEURL=http://localhost:5601
     ports:
-      - "9200:9200"
+      - "5601:5601"
     networks: [appnet]
 
   # --- OpenSearch (single-node) + Dashboards ---
@@ -415,7 +513,7 @@ services:
       - ./opensearch/generated/certs/opensearch-dashboards:/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards:ro
 
     ports:
-      - "5601:5601"
+      - "5602:5601"
     depends_on: [ opensearch ]
     networks: [ appnet ]
 
@@ -474,8 +572,9 @@ services:
       #- "7077:7077"
       - "9088:8088"
     volumes:
-      - spark-conf:/opt/spark/conf
-      - spark-jars:/opt/spark/jars
+      - ./spark/conf:/opt/spark/conf
+      - ./spark/jobs:/opt/spark/jobs
+      - ./spark/jars:/opt/spark/jars
       - spark-history:/opt/spark/history
     restart: unless-stopped
     networks: [appnet]
@@ -496,8 +595,9 @@ services:
     depends_on:
       - spark-master
     volumes:
-      - spark-conf:/opt/spark/conf
-      - spark-jars:/opt/spark/jars
+      - ./spark/conf:/opt/spark/conf
+      - ./spark/jobs:/opt/spark/jobs
+      - ./spark/jars:/opt/spark/jars
       - spark-history:/opt/spark/history
     restart: unless-stopped
     networks: [appnet]
@@ -511,7 +611,7 @@ services:
     command: >
       /opt/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer
     environment:
-      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/history"
+      SPARK_HISTORY_OPTS: "-Dspark.history.fs.logDirectory=/opt/spark/history -Dspark.history.fs.cleaner.enabled=true -Dspark.history.fs.cleaner.interval=1d -Dspark.history.fs.cleaner.maxAge=7d"
       SPARK_NO_DAEMONIZE: "true"
     ports:
       - "18080:18080"
@@ -847,8 +947,8 @@ services:
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
 
       # TLS certificates
-      - ./nginx/conf/certs/server.crt:/etc/nginx/certs/server.crt:ro
-      - ./nginx/conf/certs/server.key:/etc/nginx/certs/server.key:ro
+      - ./nginx/generated/certs/nginx/nginx.crt:/etc/nginx/certs/server.crt:ro
+      - ./nginx/generated/certs/nginx/nginx.key:/etc/nginx/certs/server.key:ro
 
       # Optional: static site or upstream configs
       # - ./html:/usr/share/nginx/html:ro
@@ -926,13 +1026,42 @@ services:
     container_name: catalog-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
-    depends_on: [elasticsearch, opensearch]
+    depends_on: [es01, es02, es03, opensearch]
     ports:
       - "8080:8080"
     networks: [appnet]
 
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://host.docker.internal:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+
+      # Web JVM (UI/API)
+      SONAR_WEB_JAVAOPTS: "-Xms1G -Xmx2G"
+
+      # Compute Engine JVM (background analysis)
+      SONAR_CE_JAVAOPTS: "-Xms2G -Xmx4G"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
+    networks:
+      - sonarnet
+    ports:
+      - "9030:9000"
+
 networks:
   appnet: {}
+  sonarnet:
+    driver: bridge
 
 volumes:
   kafka-controller-1-data: {}
@@ -941,13 +1070,19 @@ volumes:
   kafka-broker-1-data: {}
   kafka-broker-2-data: {}
   kafka-broker-3-data: {}
-  spark-conf: {}
-  spark-jars: {}
+#  spark-conf: {}
+#  spark-jars: {}
   spark-history: {}
   flink-checkpoints: {}
   flink-savepoints: {}
+  esdata01:
+  esdata02:
+  esdata03:
   opensearch-data: {}
   minio-data1: {}
   minio-data2: {}
   minio-data3: {}
   minio-data4: {}
+  sonarqube_data: {}
+  sonarqube_extensions: {}
+  sonarqube_logs: {}

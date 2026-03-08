@@ -20,20 +20,20 @@ export default function Upload() {
   const [error, setError] = useState<string | null>(null);
   const submitBtnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (!isNew && id) {
-      setLoading(true);
-      void getUser(id)
-        .then((u) => {
-          if (!u) {
-            setError(t('user.notFound'));
-            return;
-          }
-          setForm({ username: u.username, email: u.email, enabled: u.enabled });
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [id, isNew, t]);
+//   useEffect(() => {
+//     if (!isNew && id) {
+//       setLoading(true);
+//       void getUser(id)
+//         .then((u) => {
+//           if (!u) {
+//             setError(t('user.notFound'));
+//             return;
+//           }
+//           setForm({ username: u.username, email: u.email, enabled: u.enabled });
+//         })
+//         .finally(() => setLoading(false));
+//     }
+//   }, [id, isNew, t]);
 
   const onChange = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
 

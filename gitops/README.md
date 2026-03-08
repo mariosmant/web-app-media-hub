@@ -76,6 +76,26 @@ GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak_user;
 
 
 ```
+- Create sonarqube database
+```sql
+-- Create SonarQube user
+CREATE USER sonar WITH PASSWORD 'sonar';
+
+-- Create SonarQube database (UTF-8, required)
+CREATE DATABASE sonarqube
+  WITH ENCODING 'UTF8'
+       LC_COLLATE='en_US.UTF-8'
+       LC_CTYPE='en_US.UTF-8'
+       TEMPLATE=template0
+       OWNER sonar;
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonar;
+
+-- Optional but recommended: allow user to create extensions inside this DB
+ALTER DATABASE sonarqube OWNER TO sonar;
+
+```
 - Generate certs in `kafka/certs` folder, via `cert-generator/docker-compose.yml`. See `README.md` from `cert-generator` for more details.
 
 ## Build custom SMT (optional)
