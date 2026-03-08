@@ -7,7 +7,7 @@ import { NORMALIZED_APP_BASE_URL } from '../constants/paths';
 // Preload likely routes on intent
 const preloadHome = () => import('../routes/home');
 const preloadUsers = () => import('../routes/users');
-const preloadUpload = () => import('../routes/upload');
+const preloadUpload = () => import('../routes/upload-media');
 
 export function Navbar() {
   const auth = useAuth();
