@@ -90,6 +90,34 @@ class IcebergWriter:
         joined = ", ".join(columns)
         self.spark.sql(f"ALTER TABLE {full_table_name} WRITE ORDERED BY ({joined})")
 
+    def create_upscale_tracking_table_if_missing(self, full_table_name: str) -> None:
+        """Tracks every video upscale attempt: source → output, status, timing."""
+        self.spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {full_table_name} (
+            source_file_path  STRING  COMMENT 'Original s3a:// path from Bronze',
+            file_name         STRING,
+            output_file_path  STRING  COMMENT 'Upscaled s3a:// path in output bucket',
+            source_width_px   INT,
+            source_height_px  INT,
+            target_width_px   INT     COMMENT 'Always 3840 for 4K UHD',
+            target_height_px  INT     COMMENT 'Computed to preserve aspect ratio',
+            source_size_bytes BIGINT,
+            output_size_bytes BIGINT,
+            duration_ms       BIGINT  COMMENT 'Video duration',
+            video_codec       STRING  COMMENT 'Output codec, e.g. libx265',
+            crf               INT     COMMENT 'Constant Rate Factor used',
+            upscale_status    STRING  COMMENT 'OK | FAILED | SKIPPED',
+            upscale_error     STRING  COMMENT 'Error detail when status != OK',
+            wall_time_s       DOUBLE  COMMENT 'Wall-clock seconds the transcode took',
+            run_id            STRING,
+            pipeline_version  STRING,
+            upscale_ts        TIMESTAMP,
+            upscale_date      DATE
+        )
+        USING iceberg
+        PARTITIONED BY (upscale_date, upscale_status)
+        """)
+
     def merge_from_view(self, full_table_name: str, staged_view: str, merge_sql: str) -> None:
         self.spark.sql(merge_sql)
 

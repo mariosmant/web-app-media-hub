@@ -42,6 +42,8 @@ class JobConfig:
     silver_table: str
     gold_table: str
     ops_run_audit_table: str
+    upscale_tracking_table: str
+    upscale_output_path: str
 
     checkpoint_path: Optional[str]
 
@@ -66,6 +68,12 @@ class JobConfig:
             silver_table=os.getenv("SILVER_TABLE", "lakehouse.silver.media_assets"),
             gold_table=os.getenv("GOLD_TABLE", "lakehouse.gold.catalog_content"),
             ops_run_audit_table=os.getenv("OPS_RUN_AUDIT_TABLE", "lakehouse.ops.pipeline_runs"),
+            upscale_tracking_table=os.getenv(
+                "UPSCALE_TRACKING_TABLE", "lakehouse.ops.upscale_tracking"
+            ),
+            upscale_output_path=os.getenv(
+                "UPSCALE_OUTPUT_PATH", "s3a://media-lake/"
+            ),
             checkpoint_path=os.getenv("CHECKPOINT_PATH"),
         )
 

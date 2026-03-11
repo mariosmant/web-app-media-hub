@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Media platform Spark jobs for Bronze, Silver, and Gold lakehouse pipelines"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["boto3>=1.35"]
 
 [tool.setuptools]
 include-package-data = true
