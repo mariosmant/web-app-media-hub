@@ -939,130 +939,130 @@ services:
     networks:
       - appnet
 
-  nginx:
-    image: nginx:stable-alpine
-    container_name: nginx_proxy
-    restart: always
-
-    ports:
-      - "80:80"
-      - "443:443"
-
-    volumes:
-      # Your custom nginx.conf
-      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
-
-      # TLS certificates
-      - ./nginx/generated/certs/nginx/nginx.crt:/etc/nginx/certs/server.crt:ro
-      - ./nginx/generated/certs/nginx/nginx.key:/etc/nginx/certs/server.key:ro
-
-      # Optional: static site or upstream configs
-      # - ./html:/usr/share/nginx/html:ro
-      # - ./conf.d:/etc/nginx/conf.d:ro
-
-      # Logs (optional but useful)
-      - ./nginx/logs:/var/log/nginx
-
-    # Optional: healthcheck for production
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - appnet
-
-  keycloak:
-    build:
-      context: ./keycloak
-      dockerfile: Dockerfile
-      args:
-        KC_HTTP_RELATIVE_PATH: /iam-service
-        KC_HTTPS_ENABLED: "true"
-        KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
-        KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
-        KC_HTTP_ENABLED: "false"
-        KC_HOSTNAME_STRICT: "true"
-        #KC_HOSTNAME_STRICT_HTTPS: "true"
-        KC_DB: postgres
-    container_name: keycloak
-    restart: always
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-
-      KC_DB: postgres
-      KC_DB_USERNAME: ${KC_DB_USERNAME}
-      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
-      KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/keycloak
-
-      KC_HOSTNAME: localhost
-      #KC_HOSTNAME_STRICT: "true"
-      #KC_HOSTNAME_STRICT_HTTPS: "true"
-      KC_PROXY_HEADERS: forwarded
-
-      #KC_HTTPS_ENABLED: "true"
-      #KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
-      #KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
-      #KC_HTTP_ENABLED: "false"
-
-      KC_FRONTEND_URL: https://localhost/iam-service/
-      KC_HTTP_RELATIVE_PATH: /iam-service
-
-    ports:
-      - "8443:8443"
-    volumes:
-      # Keycloak config
-      - ./keycloak/conf/keycloak.conf:/opt/keycloak/conf/keycloak.conf:ro
-      # Certificates (if Keycloak handles HTTPS)
-      - ./keycloak/generated/certs/keycloak/keycloak.crt:/opt/keycloak/conf/keycloak.crt:ro
-      - ./keycloak/generated/certs/keycloak/keycloak.key:/opt/keycloak/conf/keycloak.key:ro
-      # Custom providers (JARs)
-      - ./keycloak/providers:/opt/keycloak/providers
-      # Custom themes
-      - ./keycloak/themes:/opt/keycloak/themes
-    networks:
-      - appnet
-
-  # --- Spring Boot search API (JDK 25) ---
-  catalog-service:
-    build:
-      context: ../catalog-service
-      dockerfile: Dockerfile
-    container_name: catalog-service
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-    depends_on: [es01, es02, es03, opensearch]
-    ports:
-      - "8080:8080"
-    networks: [appnet]
-
-  sonarqube:
-    image: sonarqube:latest
-    container_name: sonarqube
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://host.docker.internal:5432/sonarqube
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonar
-
-      # Web JVM (UI/API)
-      SONAR_WEB_JAVAOPTS: "-Xms1G -Xmx2G"
-
-      # Compute Engine JVM (background analysis)
-      SONAR_CE_JAVAOPTS: "-Xms2G -Xmx4G"
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-    restart: unless-stopped
-    networks:
-      - sonarnet
-    ports:
-      - "9030:9000"
+#  nginx:
+#    image: nginx:stable-alpine
+#    container_name: nginx_proxy
+#    restart: always
+#
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#
+#    volumes:
+#      # Your custom nginx.conf
+#      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+#
+#      # TLS certificates
+#      - ./nginx/generated/certs/nginx/nginx.crt:/etc/nginx/certs/server.crt:ro
+#      - ./nginx/generated/certs/nginx/nginx.key:/etc/nginx/certs/server.key:ro
+#
+#      # Optional: static site or upstream configs
+#      # - ./html:/usr/share/nginx/html:ro
+#      # - ./conf.d:/etc/nginx/conf.d:ro
+#
+#      # Logs (optional but useful)
+#      - ./nginx/logs:/var/log/nginx
+#
+#    # Optional: healthcheck for production
+#    healthcheck:
+#      test: ["CMD", "nginx", "-t"]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 3
+#    networks:
+#      - appnet
+#
+#  keycloak:
+#    build:
+#      context: ./keycloak
+#      dockerfile: Dockerfile
+#      args:
+#        KC_HTTP_RELATIVE_PATH: /iam-service
+#        KC_HTTPS_ENABLED: "true"
+#        KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
+#        KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
+#        KC_HTTP_ENABLED: "false"
+#        KC_HOSTNAME_STRICT: "true"
+#        #KC_HOSTNAME_STRICT_HTTPS: "true"
+#        KC_DB: postgres
+#    container_name: keycloak
+#    restart: always
+#    environment:
+#      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+#
+#      KC_DB: postgres
+#      KC_DB_USERNAME: ${KC_DB_USERNAME}
+#      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+#      KC_DB_URL: jdbc:postgresql://host.docker.internal:5432/keycloak
+#
+#      KC_HOSTNAME: localhost
+#      #KC_HOSTNAME_STRICT: "true"
+#      #KC_HOSTNAME_STRICT_HTTPS: "true"
+#      KC_PROXY_HEADERS: forwarded
+#
+#      #KC_HTTPS_ENABLED: "true"
+#      #KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.crt
+#      #KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak.key
+#      #KC_HTTP_ENABLED: "false"
+#
+#      KC_FRONTEND_URL: https://localhost/iam-service/
+#      KC_HTTP_RELATIVE_PATH: /iam-service
+#
+#    ports:
+#      - "8443:8443"
+#    volumes:
+#      # Keycloak config
+#      - ./keycloak/conf/keycloak.conf:/opt/keycloak/conf/keycloak.conf:ro
+#      # Certificates (if Keycloak handles HTTPS)
+#      - ./keycloak/generated/certs/keycloak/keycloak.crt:/opt/keycloak/conf/keycloak.crt:ro
+#      - ./keycloak/generated/certs/keycloak/keycloak.key:/opt/keycloak/conf/keycloak.key:ro
+#      # Custom providers (JARs)
+#      - ./keycloak/providers:/opt/keycloak/providers
+#      # Custom themes
+#      - ./keycloak/themes:/opt/keycloak/themes
+#    networks:
+#      - appnet
+#
+#  # --- Spring Boot search API (JDK 25) ---
+#  catalog-service:
+#    build:
+#      context: ../catalog-service
+#      dockerfile: Dockerfile
+#    container_name: catalog-service
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#    depends_on: [es01, es02, es03, opensearch]
+#    ports:
+#      - "8080:8080"
+#    networks: [appnet]
+#
+#  sonarqube:
+#    image: sonarqube:latest
+#    container_name: sonarqube
+#    environment:
+#      SONAR_JDBC_URL: jdbc:postgresql://host.docker.internal:5432/sonarqube
+#      SONAR_JDBC_USERNAME: sonar
+#      SONAR_JDBC_PASSWORD: sonar
+#
+#      # Web JVM (UI/API)
+#      SONAR_WEB_JAVAOPTS: "-Xms1G -Xmx2G"
+#
+#      # Compute Engine JVM (background analysis)
+#      SONAR_CE_JAVAOPTS: "-Xms2G -Xmx4G"
+#    volumes:
+#      - sonarqube_data:/opt/sonarqube/data
+#      - sonarqube_extensions:/opt/sonarqube/extensions
+#      - sonarqube_logs:/opt/sonarqube/logs
+#    ulimits:
+#      nofile:
+#        soft: 65536
+#        hard: 65536
+#    restart: unless-stopped
+#    networks:
+#      - sonarnet
+#    ports:
+#      - "9030:9000"
 
 networks:
   appnet: {}
