@@ -345,183 +345,183 @@ services:
       - appnet
 
   # ElasticSearch nodes
-  es01:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: es01
-    environment:
-      - node.name=es01
-      - cluster.name=prod-es-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
-      - discovery.seed_hosts=es02,es03
-      - node.roles=master,data
-      - xpack.security.enabled=true
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.keystore.path=certs/es01/es01.p12
-      - xpack.security.transport.ssl.keystore.password=${ES01_KEYSTORE_PASSWORD}
-      - xpack.security.transport.ssl.truststore.path=certs/es01/es01.p12
-      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - esdata01:/usr/share/elasticsearch/data
-      - ./elasticsearch/generated/certs/es01:/usr/share/elasticsearch/config/certs/es01:ro
-      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
-    networks: [appnet]
-
-  es02:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: es02
-    environment:
-      - node.name=es02
-      - cluster.name=prod-es-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
-      - discovery.seed_hosts=es01,es03
-      - node.roles=master,data
-      - xpack.security.enabled=true
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.keystore.path=certs/es02/es02.p12
-      - xpack.security.transport.ssl.keystore.password=${ES02_KEYSTORE_PASSWORD}
-      - xpack.security.transport.ssl.truststore.path=certs/es02/es02.p12
-      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - esdata02:/usr/share/elasticsearch/data
-      - ./elasticsearch/generated/certs/es02:/usr/share/elasticsearch/config/certs/es02:ro
-      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
-    networks: [appnet]
-
-  es03:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: es03
-    environment:
-      - node.name=es03
-      - cluster.name=prod-es-cluster
-      - cluster.initial_master_nodes=es01,es02,es03
-      - discovery.seed_hosts=es01,es02
-      - node.roles=master,data
-      - xpack.security.enabled=true
-      - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.verification_mode=certificate
-      - xpack.security.transport.ssl.keystore.path=certs/es03/es03.p12
-      - xpack.security.transport.ssl.keystore.password=${ES03_KEYSTORE_PASSWORD}
-      - xpack.security.transport.ssl.truststore.path=certs/es03/es03.p12
-      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
-
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - esdata03:/usr/share/elasticsearch/data
-      - ./elasticsearch/generated/certs/es03:/usr/share/elasticsearch/config/certs/es03:ro
-      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
-    networks: [appnet]
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.0
-    container_name: kibana
-    depends_on:
-      - es01
-      - es02
-      - es03
-    environment:
-      - ELASTICSEARCH_HOSTS=["http://es01:9200","http://es02:9200","http://es03:9200"]
-      - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
-      - SERVER_PUBLICBASEURL=http://localhost:5601
-    ports:
-      - "5601:5601"
-    networks: [appnet]
-
-  # --- OpenSearch (single-node) + Dashboards ---
-  opensearch:
-    image: opensearchproject/opensearch:2.14.0
-    container_name: opensearch
-    environment:
-      - discovery.type=single-node
-      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
-
-      # Security ON
-      - plugins.security.disabled=false
-
-      # Admin password
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
-
-      # === HTTP (REST) TLS ===
-      - plugins.security.ssl.http.enabled=true
-      - plugins.security.ssl.http.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.crt
-      - plugins.security.ssl.http.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.key
-      - plugins.security.ssl.http.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
-
-      # === Transport (cluster) TLS ===
-      - plugins.security.ssl.transport.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.crt
-      - plugins.security.ssl.transport.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.key
-      - plugins.security.ssl.transport.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
-      - plugins.security.ssl.transport.enforce_hostname_verification=true
-      - plugins.security.ssl.transport.resolve_hostname=true
-
-      # Optional: strict security config
-      - plugins.security.allow_default_init_securityindex=true # Should be false for prod.
-      - plugins.security.audit.type=internal_opensearch
-
-    volumes:
-      - ./opensearch/generated/certs/ca:/usr/share/opensearch/config/certs/ca:ro
-      - ./opensearch/generated/certs/opensearch:/usr/share/opensearch/config/certs/opensearch:ro
-      - opensearch-data:/usr/share/opensearch/data
-
-    ports:
-      - "9201:9200"
-    networks: [ appnet ]
-
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.14.0
-    container_name: opensearch-dashboards
-    environment:
-      # Connect to OpenSearch over HTTPS
-      - OPENSEARCH_HOSTS=["https://opensearch:9200"]
-
-      # Security ON
-      - OPENSEARCH_SECURITY_ENABLED=true
-
-      # Trust OpenSearch's CA
-      - OPENSEARCH_SSL_VERIFICATIONMODE=certificate
-      - OPENSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/opensearch-dashboards/config/certs/ca/root-os-ca.crt
-
-      # Optional: enable HTTPS for Dashboards itself
-      - SERVER_SSL_ENABLED=true
-      - SERVER_SSL_CERTIFICATE=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.crt
-      - SERVER_SSL_KEY=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.key
-
-    volumes:
-      - ./opensearch/generated/certs/ca:/usr/share/opensearch-dashboards/config/certs/ca:ro
-      - ./opensearch/generated/certs/opensearch-dashboards:/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards:ro
-
-    ports:
-      - "5602:5601"
-    depends_on: [ opensearch ]
-    networks: [ appnet ]
+#  es01:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+#    container_name: es01
+#    environment:
+#      - node.name=es01
+#      - cluster.name=prod-es-cluster
+#      - cluster.initial_master_nodes=es01,es02,es03
+#      - discovery.seed_hosts=es02,es03
+#      - node.roles=master,data
+#      - xpack.security.enabled=true
+#      - xpack.security.transport.ssl.enabled=true
+#      - xpack.security.transport.ssl.verification_mode=certificate
+#      - xpack.security.transport.ssl.keystore.path=certs/es01/es01.p12
+#      - xpack.security.transport.ssl.keystore.password=${ES01_KEYSTORE_PASSWORD}
+#      - xpack.security.transport.ssl.truststore.path=certs/es01/es01.p12
+#      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+#      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#      nofile:
+#        soft: 65536
+#        hard: 65536
+#    volumes:
+#      - esdata01:/usr/share/elasticsearch/data
+#      - ./elasticsearch/generated/certs/es01:/usr/share/elasticsearch/config/certs/es01:ro
+#      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+#    networks: [appnet]
+#
+#  es02:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+#    container_name: es02
+#    environment:
+#      - node.name=es02
+#      - cluster.name=prod-es-cluster
+#      - cluster.initial_master_nodes=es01,es02,es03
+#      - discovery.seed_hosts=es01,es03
+#      - node.roles=master,data
+#      - xpack.security.enabled=true
+#      - xpack.security.transport.ssl.enabled=true
+#      - xpack.security.transport.ssl.verification_mode=certificate
+#      - xpack.security.transport.ssl.keystore.path=certs/es02/es02.p12
+#      - xpack.security.transport.ssl.keystore.password=${ES02_KEYSTORE_PASSWORD}
+#      - xpack.security.transport.ssl.truststore.path=certs/es02/es02.p12
+#      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+#      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#      nofile:
+#        soft: 65536
+#        hard: 65536
+#    volumes:
+#      - esdata02:/usr/share/elasticsearch/data
+#      - ./elasticsearch/generated/certs/es02:/usr/share/elasticsearch/config/certs/es02:ro
+#      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+#    networks: [appnet]
+#
+#  es03:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+#    container_name: es03
+#    environment:
+#      - node.name=es03
+#      - cluster.name=prod-es-cluster
+#      - cluster.initial_master_nodes=es01,es02,es03
+#      - discovery.seed_hosts=es01,es02
+#      - node.roles=master,data
+#      - xpack.security.enabled=true
+#      - xpack.security.transport.ssl.enabled=true
+#      - xpack.security.transport.ssl.verification_mode=certificate
+#      - xpack.security.transport.ssl.keystore.path=certs/es03/es03.p12
+#      - xpack.security.transport.ssl.keystore.password=${ES03_KEYSTORE_PASSWORD}
+#      - xpack.security.transport.ssl.truststore.path=certs/es03/es03.p12
+#      - xpack.security.transport.ssl.truststore.password=${TRUSTSTORE_PASSWORD}
+#
+#      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+#      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#      nofile:
+#        soft: 65536
+#        hard: 65536
+#    volumes:
+#      - esdata03:/usr/share/elasticsearch/data
+#      - ./elasticsearch/generated/certs/es03:/usr/share/elasticsearch/config/certs/es03:ro
+#      - ./elasticsearch/generated/certs/truststore:/usr/share/elasticsearch/config/certs/truststore:ro
+#    networks: [appnet]
+#
+#  kibana:
+#    image: docker.elastic.co/kibana/kibana:8.15.0
+#    container_name: kibana
+#    depends_on:
+#      - es01
+#      - es02
+#      - es03
+#    environment:
+#      - ELASTICSEARCH_HOSTS=["http://es01:9200","http://es02:9200","http://es03:9200"]
+#      - ELASTICSEARCH_USERNAME=elastic
+#      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+#      - SERVER_PUBLICBASEURL=http://localhost:5601
+#    ports:
+#      - "5601:5601"
+#    networks: [appnet]
+#
+#  # --- OpenSearch (single-node) + Dashboards ---
+#  opensearch:
+#    image: opensearchproject/opensearch:2.14.0
+#    container_name: opensearch
+#    environment:
+#      - discovery.type=single-node
+#      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+#
+#      # Security ON
+#      - plugins.security.disabled=false
+#
+#      # Admin password
+#      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_ADMIN_PASSWORD}
+#
+#      # === HTTP (REST) TLS ===
+#      - plugins.security.ssl.http.enabled=true
+#      - plugins.security.ssl.http.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.crt
+#      - plugins.security.ssl.http.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch.key
+#      - plugins.security.ssl.http.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
+#
+#      # === Transport (cluster) TLS ===
+#      - plugins.security.ssl.transport.pemcert_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.crt
+#      - plugins.security.ssl.transport.pemkey_filepath=/usr/share/opensearch/config/certs/opensearch/opensearch-transport.key
+#      - plugins.security.ssl.transport.pemtrustedcas_filepath=/usr/share/opensearch/config/certs/ca/root-os-ca.crt
+#      - plugins.security.ssl.transport.enforce_hostname_verification=true
+#      - plugins.security.ssl.transport.resolve_hostname=true
+#
+#      # Optional: strict security config
+#      - plugins.security.allow_default_init_securityindex=true # Should be false for prod.
+#      - plugins.security.audit.type=internal_opensearch
+#
+#    volumes:
+#      - ./opensearch/generated/certs/ca:/usr/share/opensearch/config/certs/ca:ro
+#      - ./opensearch/generated/certs/opensearch:/usr/share/opensearch/config/certs/opensearch:ro
+#      - opensearch-data:/usr/share/opensearch/data
+#
+#    ports:
+#      - "9201:9200"
+#    networks: [ appnet ]
+#
+#  opensearch-dashboards:
+#    image: opensearchproject/opensearch-dashboards:2.14.0
+#    container_name: opensearch-dashboards
+#    environment:
+#      # Connect to OpenSearch over HTTPS
+#      - OPENSEARCH_HOSTS=["https://opensearch:9200"]
+#
+#      # Security ON
+#      - OPENSEARCH_SECURITY_ENABLED=true
+#
+#      # Trust OpenSearch's CA
+#      - OPENSEARCH_SSL_VERIFICATIONMODE=certificate
+#      - OPENSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/opensearch-dashboards/config/certs/ca/root-os-ca.crt
+#
+#      # Optional: enable HTTPS for Dashboards itself
+#      - SERVER_SSL_ENABLED=true
+#      - SERVER_SSL_CERTIFICATE=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.crt
+#      - SERVER_SSL_KEY=/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards/opensearch-dashboards.key
+#
+#    volumes:
+#      - ./opensearch/generated/certs/ca:/usr/share/opensearch-dashboards/config/certs/ca:ro
+#      - ./opensearch/generated/certs/opensearch-dashboards:/usr/share/opensearch-dashboards/config/certs/opensearch-dashboards:ro
+#
+#    ports:
+#      - "5602:5601"
+#    depends_on: [ opensearch ]
+#    networks: [ appnet ]
 
   # ============================
   # MinIO (S3-compatible storage)
