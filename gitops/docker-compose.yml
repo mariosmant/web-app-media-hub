@@ -49,300 +49,300 @@ x-airflow-common:
 
 services:
   # --- Kafka KRaft controllers ---
-  kafka-controller-1:
-    image: apache/kafka:4.1.1
-    container_name: kafka-controller-1
-    command: |
-      bash -c "  
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka
-    volumes:
-      - ./kafka/kraft/controller-1.properties:/etc/kafka/controller.properties
-      - kafka-controller-1-data:/var/lib/kafka
-      - ./kafka/generated/certs/controller-1/kafka-controller-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [appnet]
-
-  kafka-controller-2:
-    image: apache/kafka:4.1.1
-    container_name: kafka-controller-2
-    command: |
-      bash -c "
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka
-    volumes:
-      - ./kafka/kraft/controller-2.properties:/etc/kafka/controller.properties
-      - kafka-controller-2-data:/var/lib/kafka
-      - ./kafka/generated/certs/controller-2/kafka-controller-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [appnet]
-
-  kafka-controller-3:
-    image: apache/kafka:4.1.1
-    container_name: kafka-controller-3
-    command: |
-      bash -c "
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka
-    volumes:
-      - ./kafka/kraft/controller-3.properties:/etc/kafka/controller.properties
-      - kafka-controller-3-data:/var/lib/kafka
-      - ./kafka/generated/certs/controller-3/kafka-controller-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [appnet]
-
-  # --- Kafka KRaft brokers ---
-  kafka-broker-1:
-    image: apache/kafka:4.1.1
-    container_name: kafka-broker-1
-    depends_on: [kafka-controller-1, kafka-controller-2, kafka-controller-3]
-    ports:
-      - "19092:19092"
-    command: |
-      bash -c "
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-    volumes:
-      - ./kafka/kraft/broker-1.properties:/etc/kafka/server.properties
-      - kafka-broker-1-data:/var/lib/kafka
-      - ./kafka/generated/certs/broker-1/kafka-broker-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [appnet]
-
-  kafka-broker-2:
-    image: apache/kafka:4.1.1
-    container_name: kafka-broker-2
-    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
-    ports:
-      - "19093:19092"
-    command: |
-      bash -c "
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-    volumes:
-      - ./kafka/kraft/broker-2.properties:/etc/kafka/server.properties
-      - kafka-broker-2-data:/var/lib/kafka
-      - ./kafka/generated/certs/broker-2/kafka-broker-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [ appnet ]
-
-  kafka-broker-3:
-    image: apache/kafka:4.1.1
-    container_name: kafka-broker-3
-    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
-    ports:
-      - "19094:19092"
-    command: |
-      bash -c "
-      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
-      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
-      "
-    environment:
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-    volumes:
-      - ./kafka/kraft/broker-3.properties:/etc/kafka/server.properties
-      - kafka-broker-3-data:/var/lib/kafka
-      - ./kafka/generated/certs/broker-3/kafka-broker-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
-    networks: [ appnet ]
-
-  # --- Schema Registry (Avro) ---
-  kafka-confl-schema-registry:
-    image: confluentinc/cp-schema-registry:7.6.1
-    container_name: kafka-confl-schema-registry
-    depends_on: [kafka-broker-1, kafka-broker-2, kafka-broker-3]
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: kafka-confl-schema-registry
-      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SSL://kafka-broker-1:9092,SSL://kafka-broker-2:9092,SSL://kafka-broker-3:9092
-      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SSL
-      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/schema-registry/secrets/keystore.p12
-      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
-      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
-      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/schema-registry/secrets/truststore.p12
-      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
-
-      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: BACKWARD
-    volumes:
-      - ./kafka/generated/certs/confl-schema-registry/kafka-confl-schema-registry-keystore.p12:/etc/schema-registry/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/schema-registry/secrets/truststore.p12:ro
-    ports:
-      - "9081:8081"
-    networks: [appnet]
-
-  ##############################
-  # Apicurio Registry (Avro)   #
-  ##############################
-  apicurio-registry:
-    image: apicurio/apicurio-registry:latest-release
-    container_name: apicurio-registry
-    ports:
-      - "9082:8080"    # Apicurio runs on 8080 internally
-    environment:
-      - QUARKUS_HTTP_PORT=8080
-      - APICURIO_STORAGE_KIND=sql
-      - APICURIO_STORAGE_SQL_KIND=postgresql
-      - APICURIO_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/apicurio
-      - APICURIO_DATASOURCE_USERNAME=apicurio
-      - APICURIO_DATASOURCE_PASSWORD=secret
-    networks: [ appnet ]
-
-  # --- Kafka Connect (Debezium + sinks) ---
-  kafka-connect:
-    image: quay.io/debezium/connect:2.7
-    container_name: kafka-connect
-    depends_on:
-      - kafka-broker-1
-      - kafka-broker-2
-      - kafka-broker-3
-      - apicurio-registry
-
-    environment:
-      # ------------------------------------------------------------
-      # Kafka Connect worker SSL configuration (correct prefixes)
-      # ------------------------------------------------------------
-      BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
-
-      CONNECT_SECURITY_PROTOCOL: SSL
-      CONNECT_SSL_KEYSTORE_LOCATION: /etc/kafka-connect/secrets/keystore.p12
-      CONNECT_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
-      CONNECT_SSL_KEY_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
-      CONNECT_SSL_KEYSTORE_TYPE: PKCS12
-
-      CONNECT_SSL_TRUSTSTORE_LOCATION: /etc/kafka-connect/secrets/truststore.p12
-      CONNECT_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
-      CONNECT_SSL_TRUSTSTORE_TYPE: PKCS12
-
-      # Enable hostname verification (your certs are correct)
-      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
-
-      # ------------------------------------------------------------
-      # Internal Kafka Connect topics
-      # ------------------------------------------------------------
-      GROUP_ID: connect-cluster
-      CONFIG_STORAGE_TOPIC: _connect-configs
-      OFFSET_STORAGE_TOPIC: _connect-offsets
-      STATUS_STORAGE_TOPIC: _connect-status
-
-      CONFIG_STORAGE_REPLICATION_FACTOR: 3
-      OFFSET_STORAGE_REPLICATION_FACTOR: 3
-      STATUS_STORAGE_REPLICATION_FACTOR: 3
-
-      # ------------------------------------------------------------
-      # Apicurio converters
-      # ------------------------------------------------------------
-      ENABLE_APICURIO_CONVERTERS: "true"
-
-      KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-      VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
-
-      KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
-      VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
-
-      KEY_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
-      VALUE_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
-
-      KEY_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
-      VALUE_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
-
-      # ------------------------------------------------------------
-      # REST API
-      # ------------------------------------------------------------
-      REST_ADVERTISED_HOST_NAME: kafka-connect
-      REST_PORT: 8083
-
-      # ------------------------------------------------------------
-      # Plugins
-      # ------------------------------------------------------------
-      PLUGIN_PATH: /kafka/connect/plugins
-      ERRORS_LOG_ENABLE: "true"
-    volumes:
-      - ./kafka/generated/connect/plugins:/kafka/connect/plugins
-      - ./kafka/generated/certs/connect/kafka-connect-keystore.p12:/etc/kafka-connect/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-connect/secrets/truststore.p12:ro
-    ports:
-      - "9083:8083"
-    networks:
-      - appnet
-
-  kafdrop:
-    image: obsidiandynamics/kafdrop:latest
-    container_name: kafdrop
-    depends_on:
-      - kafka-broker-1
-      - kafka-broker-2
-      - kafka-broker-3
-      - kafka-confl-schema-registry
-    ports:
-      - "9050:9000"   # expose only if you want UI from host
-    environment:
-      # ------------------------------------------------------------
-      # Kafka cluster connection (internal SSL listeners)
-      # ------------------------------------------------------------
-      KAFKA_BROKERCONNECT: "kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092"
-      SERVER_PORT: 9000
-      SERVER_SERVLET_CONTEXTPATH: "/"
-
-      # ------------------------------------------------------------
-      # Schema Registry integration (Confluent)
-      # ------------------------------------------------------------
-      SCHEMAREGISTRY_CONNECT: "http://kafka-confl-schema-registry:8081"
-
-      KAFKA_PROPERTIES_FILE: /kafdrop/kafka.properties
-      KAFKA_TRUSTSTORE_FILE: /etc/kafdrop/secrets/truststore.p12
-      KAFKA_KEYSTORE_FILE: /etc/kafdrop/secrets/keystore.p12
-
-      # ------------------------------------------------------------
-      # JVM tuning (optional)
-      # ------------------------------------------------------------
-      JVM_OPTS: "-Xms512M -Xmx2G"
-
-    volumes:
-      - ./kafka/kafdrop/kafka.properties:/kafdrop/kafka.properties:ro
-      - ./kafka/generated/certs/kafdrop/kafdrop-keystore.p12:/etc/kafdrop/secrets/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafdrop/secrets/truststore.p12:ro
-
-    restart: unless-stopped
-    networks:
-      - appnet
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "9180:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: kraft-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
-
-      # SSL / mTLS
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
-      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /etc/kafka-ui/truststore.p12
-      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: truststore-pass_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
-      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_LOCATION: /etc/kafka-ui/keystore.p12
-      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
-      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEY_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
-
-    volumes:
-      - ./kafka/generated/certs/kafka-ui/kafka-ui-keystore.p12:/etc/kafka-ui/keystore.p12:ro
-      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-ui/truststore.p12:ro
-    networks:
-      - appnet
+#  kafka-controller-1:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-controller-1
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka
+#    volumes:
+#      - ./kafka/kraft/controller-1.properties:/etc/kafka/controller.properties
+#      - kafka-controller-1-data:/var/lib/kafka
+#      - ./kafka/generated/certs/controller-1/kafka-controller-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [appnet]
+#
+#  kafka-controller-2:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-controller-2
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka
+#    volumes:
+#      - ./kafka/kraft/controller-2.properties:/etc/kafka/controller.properties
+#      - kafka-controller-2-data:/var/lib/kafka
+#      - ./kafka/generated/certs/controller-2/kafka-controller-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [appnet]
+#
+#  kafka-controller-3:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-controller-3
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/controller.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/controller.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka
+#    volumes:
+#      - ./kafka/kraft/controller-3.properties:/etc/kafka/controller.properties
+#      - kafka-controller-3-data:/var/lib/kafka
+#      - ./kafka/generated/certs/controller-3/kafka-controller-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [appnet]
+#
+#  # --- Kafka KRaft brokers ---
+#  kafka-broker-1:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-broker-1
+#    depends_on: [kafka-controller-1, kafka-controller-2, kafka-controller-3]
+#    ports:
+#      - "19092:19092"
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka/data
+#    volumes:
+#      - ./kafka/kraft/broker-1.properties:/etc/kafka/server.properties
+#      - kafka-broker-1-data:/var/lib/kafka
+#      - ./kafka/generated/certs/broker-1/kafka-broker-1-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [appnet]
+#
+#  kafka-broker-2:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-broker-2
+#    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
+#    ports:
+#      - "19093:19092"
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka/data
+#    volumes:
+#      - ./kafka/kraft/broker-2.properties:/etc/kafka/server.properties
+#      - kafka-broker-2-data:/var/lib/kafka
+#      - ./kafka/generated/certs/broker-2/kafka-broker-2-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [ appnet ]
+#
+#  kafka-broker-3:
+#    image: apache/kafka:4.1.1
+#    container_name: kafka-broker-3
+#    depends_on: [ kafka-controller-1, kafka-controller-2, kafka-controller-3 ]
+#    ports:
+#      - "19094:19092"
+#    command: |
+#      bash -c "
+#      /opt/kafka/bin/kafka-storage.sh format --config /etc/kafka/server.properties --cluster-id kraft-cluster-0001 --ignore-formatted &&
+#      /opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties
+#      "
+#    environment:
+#      KAFKA_LOG_DIRS: /var/lib/kafka/data
+#    volumes:
+#      - ./kafka/kraft/broker-3.properties:/etc/kafka/server.properties
+#      - kafka-broker-3-data:/var/lib/kafka
+#      - ./kafka/generated/certs/broker-3/kafka-broker-3-keystore.p12:/etc/kafka/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka/secrets/truststore.p12:ro
+#    networks: [ appnet ]
+#
+#  # --- Schema Registry (Avro) ---
+#  kafka-confl-schema-registry:
+#    image: confluentinc/cp-schema-registry:7.6.1
+#    container_name: kafka-confl-schema-registry
+#    depends_on: [kafka-broker-1, kafka-broker-2, kafka-broker-3]
+#    environment:
+#      SCHEMA_REGISTRY_HOST_NAME: kafka-confl-schema-registry
+#      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+#      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SSL://kafka-broker-1:9092,SSL://kafka-broker-2:9092,SSL://kafka-broker-3:9092
+#      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SSL
+#      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/schema-registry/secrets/keystore.p12
+#      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
+#      SCHEMA_REGISTRY_KAFKASTORE_SSL_KEY_PASSWORD: ${KAFKA_CONFL_SCHEMA_REGISTRY_KEYSTORE_PASSWORD}
+#      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/schema-registry/secrets/truststore.p12
+#      SCHEMA_REGISTRY_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
+#
+#      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: BACKWARD
+#    volumes:
+#      - ./kafka/generated/certs/confl-schema-registry/kafka-confl-schema-registry-keystore.p12:/etc/schema-registry/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/schema-registry/secrets/truststore.p12:ro
+#    ports:
+#      - "9081:8081"
+#    networks: [appnet]
+#
+#  ##############################
+#  # Apicurio Registry (Avro)   #
+#  ##############################
+#  apicurio-registry:
+#    image: apicurio/apicurio-registry:latest-release
+#    container_name: apicurio-registry
+#    ports:
+#      - "9082:8080"    # Apicurio runs on 8080 internally
+#    environment:
+#      - QUARKUS_HTTP_PORT=8080
+#      - APICURIO_STORAGE_KIND=sql
+#      - APICURIO_STORAGE_SQL_KIND=postgresql
+#      - APICURIO_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/apicurio
+#      - APICURIO_DATASOURCE_USERNAME=apicurio
+#      - APICURIO_DATASOURCE_PASSWORD=secret
+#    networks: [ appnet ]
+#
+#  # --- Kafka Connect (Debezium + sinks) ---
+#  kafka-connect:
+#    image: quay.io/debezium/connect:2.7
+#    container_name: kafka-connect
+#    depends_on:
+#      - kafka-broker-1
+#      - kafka-broker-2
+#      - kafka-broker-3
+#      - apicurio-registry
+#
+#    environment:
+#      # ------------------------------------------------------------
+#      # Kafka Connect worker SSL configuration (correct prefixes)
+#      # ------------------------------------------------------------
+#      BOOTSTRAP_SERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+#
+#      CONNECT_SECURITY_PROTOCOL: SSL
+#      CONNECT_SSL_KEYSTORE_LOCATION: /etc/kafka-connect/secrets/keystore.p12
+#      CONNECT_SSL_KEYSTORE_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
+#      CONNECT_SSL_KEY_PASSWORD: ${KAFKA_CONNECT_KEYSTORE_PASSWORD}
+#      CONNECT_SSL_KEYSTORE_TYPE: PKCS12
+#
+#      CONNECT_SSL_TRUSTSTORE_LOCATION: /etc/kafka-connect/secrets/truststore.p12
+#      CONNECT_SSL_TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
+#      CONNECT_SSL_TRUSTSTORE_TYPE: PKCS12
+#
+#      # Enable hostname verification (your certs are correct)
+#      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: https
+#
+#      # ------------------------------------------------------------
+#      # Internal Kafka Connect topics
+#      # ------------------------------------------------------------
+#      GROUP_ID: connect-cluster
+#      CONFIG_STORAGE_TOPIC: _connect-configs
+#      OFFSET_STORAGE_TOPIC: _connect-offsets
+#      STATUS_STORAGE_TOPIC: _connect-status
+#
+#      CONFIG_STORAGE_REPLICATION_FACTOR: 3
+#      OFFSET_STORAGE_REPLICATION_FACTOR: 3
+#      STATUS_STORAGE_REPLICATION_FACTOR: 3
+#
+#      # ------------------------------------------------------------
+#      # Apicurio converters
+#      # ------------------------------------------------------------
+#      ENABLE_APICURIO_CONVERTERS: "true"
+#
+#      KEY_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+#      VALUE_CONVERTER: io.apicurio.registry.utils.converter.AvroConverter
+#
+#      KEY_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+#      VALUE_CONVERTER_APICURIO_REGISTRY_URL: http://apicurio-registry:8080/apis/registry/v2
+#
+#      KEY_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
+#      VALUE_CONVERTER_APICURIO_REGISTRY_AUTO_REGISTER: "true"
+#
+#      KEY_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
+#      VALUE_CONVERTER_APICURIO_REGISTRY_FIND_LATEST: "true"
+#
+#      # ------------------------------------------------------------
+#      # REST API
+#      # ------------------------------------------------------------
+#      REST_ADVERTISED_HOST_NAME: kafka-connect
+#      REST_PORT: 8083
+#
+#      # ------------------------------------------------------------
+#      # Plugins
+#      # ------------------------------------------------------------
+#      PLUGIN_PATH: /kafka/connect/plugins
+#      ERRORS_LOG_ENABLE: "true"
+#    volumes:
+#      - ./kafka/generated/connect/plugins:/kafka/connect/plugins
+#      - ./kafka/generated/certs/connect/kafka-connect-keystore.p12:/etc/kafka-connect/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-connect/secrets/truststore.p12:ro
+#    ports:
+#      - "9083:8083"
+#    networks:
+#      - appnet
+#
+#  kafdrop:
+#    image: obsidiandynamics/kafdrop:latest
+#    container_name: kafdrop
+#    depends_on:
+#      - kafka-broker-1
+#      - kafka-broker-2
+#      - kafka-broker-3
+#      - kafka-confl-schema-registry
+#    ports:
+#      - "9050:9000"   # expose only if you want UI from host
+#    environment:
+#      # ------------------------------------------------------------
+#      # Kafka cluster connection (internal SSL listeners)
+#      # ------------------------------------------------------------
+#      KAFKA_BROKERCONNECT: "kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092"
+#      SERVER_PORT: 9000
+#      SERVER_SERVLET_CONTEXTPATH: "/"
+#
+#      # ------------------------------------------------------------
+#      # Schema Registry integration (Confluent)
+#      # ------------------------------------------------------------
+#      SCHEMAREGISTRY_CONNECT: "http://kafka-confl-schema-registry:8081"
+#
+#      KAFKA_PROPERTIES_FILE: /kafdrop/kafka.properties
+#      KAFKA_TRUSTSTORE_FILE: /etc/kafdrop/secrets/truststore.p12
+#      KAFKA_KEYSTORE_FILE: /etc/kafdrop/secrets/keystore.p12
+#
+#      # ------------------------------------------------------------
+#      # JVM tuning (optional)
+#      # ------------------------------------------------------------
+#      JVM_OPTS: "-Xms512M -Xmx2G"
+#
+#    volumes:
+#      - ./kafka/kafdrop/kafka.properties:/kafdrop/kafka.properties:ro
+#      - ./kafka/generated/certs/kafdrop/kafdrop-keystore.p12:/etc/kafdrop/secrets/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafdrop/secrets/truststore.p12:ro
+#
+#    restart: unless-stopped
+#    networks:
+#      - appnet
+#
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    container_name: kafka-ui
+#    ports:
+#      - "9180:8080"
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: kraft-cluster
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-1:9092,kafka-broker-2:9092,kafka-broker-3:9092
+#
+#      # SSL / mTLS
+#      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SSL
+#      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_LOCATION: /etc/kafka-ui/truststore.p12
+#      KAFKA_CLUSTERS_0_PROPERTIES_SSL_TRUSTSTORE_PASSWORD: truststore-pass_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+#      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_LOCATION: /etc/kafka-ui/keystore.p12
+#      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEYSTORE_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+#      KAFKA_CLUSTERS_0_PROPERTIES_SSL_KEY_PASSWORD: kafka_ui-keystore_pass_and_key_pass_same_as_one_length_at_least_32_chars_suggested_around_256_but_is_unlimited_should_be_with_high_entropy_random_accept_utf8
+#
+#    volumes:
+#      - ./kafka/generated/certs/kafka-ui/kafka-ui-keystore.p12:/etc/kafka-ui/keystore.p12:ro
+#      - ./kafka/generated/certs/truststore/kafka-truststore.p12:/etc/kafka-ui/truststore.p12:ro
+#    networks:
+#      - appnet
 
   # ElasticSearch nodes
 #  es01:
@@ -626,62 +626,62 @@ services:
     restart: unless-stopped
     networks: [appnet]
 
-  flink-jobmanager:
-    image: apache/flink:2.2
-    container_name: flink-jobmanager
-    command: jobmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 4
-        state.backend: rocksdb
-        state.checkpoints.dir: file:///flink-checkpoints
-        state.savepoints.dir: file:///flink-savepoints
-    ports:
-      - "9084:8081"   # Flink UI
-    volumes:
-      - flink-checkpoints:/flink-checkpoints
-      - flink-savepoints:/flink-savepoints
-    depends_on:
-      - kafka-broker-1
-      - minio
-    networks:
-      - appnet
-
-  flink-taskmanager-1:
-    image: apache/flink:2.2
-    container_name: flink-taskmanager-1
-    command: taskmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 4
-    depends_on:
-      - flink-jobmanager
-    volumes:
-      - flink-checkpoints:/flink-checkpoints
-      - flink-savepoints:/flink-savepoints
-    networks:
-      - appnet
-
-  flink-taskmanager-2:
-    image: apache/flink:2.2
-    container_name: flink-taskmanager-2
-    command: taskmanager
-    environment:
-      - |
-        FLINK_PROPERTIES=
-        jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 4
-    depends_on:
-      - flink-jobmanager
-    volumes:
-      - flink-checkpoints:/flink-checkpoints
-      - flink-savepoints:/flink-savepoints
-    networks:
-      - appnet
+#  flink-jobmanager:
+#    image: apache/flink:2.2
+#    container_name: flink-jobmanager
+#    command: jobmanager
+#    environment:
+#      - |
+#        FLINK_PROPERTIES=
+#        jobmanager.rpc.address: flink-jobmanager
+#        taskmanager.numberOfTaskSlots: 4
+#        state.backend: rocksdb
+#        state.checkpoints.dir: file:///flink-checkpoints
+#        state.savepoints.dir: file:///flink-savepoints
+#    ports:
+#      - "9084:8081"   # Flink UI
+#    volumes:
+#      - flink-checkpoints:/flink-checkpoints
+#      - flink-savepoints:/flink-savepoints
+#    depends_on:
+#      - kafka-broker-1
+#      - minio
+#    networks:
+#      - appnet
+#
+#  flink-taskmanager-1:
+#    image: apache/flink:2.2
+#    container_name: flink-taskmanager-1
+#    command: taskmanager
+#    environment:
+#      - |
+#        FLINK_PROPERTIES=
+#        jobmanager.rpc.address: flink-jobmanager
+#        taskmanager.numberOfTaskSlots: 4
+#    depends_on:
+#      - flink-jobmanager
+#    volumes:
+#      - flink-checkpoints:/flink-checkpoints
+#      - flink-savepoints:/flink-savepoints
+#    networks:
+#      - appnet
+#
+#  flink-taskmanager-2:
+#    image: apache/flink:2.2
+#    container_name: flink-taskmanager-2
+#    command: taskmanager
+#    environment:
+#      - |
+#        FLINK_PROPERTIES=
+#        jobmanager.rpc.address: flink-jobmanager
+#        taskmanager.numberOfTaskSlots: 4
+#    depends_on:
+#      - flink-jobmanager
+#    volumes:
+#      - flink-checkpoints:/flink-checkpoints
+#      - flink-savepoints:/flink-savepoints
+#    networks:
+#      - appnet
 
   airflow-redis:
     image: redis:7.4.7-bookworm
