@@ -571,10 +571,12 @@ services:
     container_name: iceberg-rest
     environment:
       CATALOG_WAREHOUSE: s3://media-lake/warehouse/
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
       CATALOG_S3_ENDPOINT: http://minio:9000
       CATALOG_S3_ACCESS_KEY_ID: minioadmin
       CATALOG_S3_SECRET_ACCESS_KEY: minioadmin123
       CATALOG_S3_PATH_STYLE_ACCESS: "true"
+      CATALOG_S3_REGION: us-east-1
     ports:
       - "8181:8181"
     depends_on:
