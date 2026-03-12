@@ -23,11 +23,12 @@ ENV PATH="/opt/spark/bin:${PATH}"
 USER airflow
 
 # Install Python dependencies
-COPY requirements.txt /requirements.txt
+COPY ./airflow/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 # (Optional) Embed DAGs and plugins into the image
 # For local dev you can still override with volumes in docker-compose
-COPY dags/ /opt/airflow/dags/
-COPY dist/ /opt/airflow/dist/
-COPY plugins/ /opt/airflow/plugins/
+COPY ./airflow/dags/ /opt/airflow/dags/
+COPY ./spark/dist/ /opt/airflow/dist/
+COPY ./spark/jars/ /opt/airflow/jars/
+COPY ./airflow/plugins/ /opt/airflow/plugins/

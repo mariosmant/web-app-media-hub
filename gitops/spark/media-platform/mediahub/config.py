@@ -72,7 +72,7 @@ class JobConfig:
                 "UPSCALE_TRACKING_TABLE", "lakehouse.ops.upscale_tracking"
             ),
             upscale_output_path=os.getenv(
-                "UPSCALE_OUTPUT_PATH", "s3a://media-lake/"
+                "UPSCALE_OUTPUT_PATH", "s3a://media-processed/"
             ),
             checkpoint_path=os.getenv("CHECKPOINT_PATH"),
         )
